@@ -1,57 +1,50 @@
 '''
-Phase lag effect variables for the Sediment Transport group term project
+Phase lag effect equations for the Sediment Transport group term project
 
 By: Luis D. Perez-Squeo
 Updated: May 13, 2024
 '''
 
-def D_star():
-    
-    '''
-    Inputs:
-    eta         -> ripple height    
-    u_c         -> peak crest orbital velocity    
-    c_w         -> wave speed
-    T_c         -> period of the crest (positive) half cycle
-    T_cu        -> period of accelerating flow within the crest half cycle
-    delta_sc    -> sheet flow layer thickness for the crest half cycle
-    w_s         -> particle settling velocity
-    alpha       -> calibration coefficient (alpha=8.2 in VDA13)
-    xi          -> calibration factor (xi=1.7 in VDA13)    
-    
-    Output:
-    P_c         -> phase lag parameter for the crest half cycle
-    '''
-    
-    Dstar    = ((g*(s-1)/(nu**2))**(1/3)) * d50             # Non-dimensional grain size 
-    
-    return w_s
+import numpy as np
 
-def w_s():
+def D_star(s, d50):
     
     '''
     Inputs:
-    eta         -> ripple height    
-    u_c         -> peak crest orbital velocity    
-    c_w         -> wave speed
-    T_c         -> period of the crest (positive) half cycle
-    T_cu        -> period of accelerating flow within the crest half cycle
-    delta_sc    -> sheet flow layer thickness for the crest half cycle
-    w_s         -> particle settling velocity
-    alpha       -> calibration coefficient (alpha=8.2 in VDA13)
-    xi          -> calibration factor (xi=1.7 in VDA13)    
-    
+    s           -> specific gravity of the sediment (considering quartz) 
+    d50         -> median grain diameter [m]
+    g           -> gravitational acceleration [m/s^2]   
+    nu          -> kinematic viscosity of water [m^2/s]
+
     Output:
-    P_c         -> phase lag parameter for the crest half cycle
+    D_star      -> non-dimensional grain size 
     '''
     
-    # Settling velocity [m/s] 
-    if Dstar**3 <= 16.187:
-        ws = nu*(Dstar**3)/(18*d50)
-    elif 16.187 < Dstar**3 <= 16187: 
-        ws = (10*nu/d50)*(np.sqrt(1 + 0.01*(Dstar**3))-1)
-    elif Dstar**3 > 16187:
-        ws = 1.1*nu*(Dstar**1.5)/d50
+    g      = 9.81
+    nu     = 2e-6
+    D_star = ((g*(s-1)/(nu**2))**(1/3)) * d50
+    
+    return D_star
+
+def w_s(D_star, d50):
+    
+    '''
+    Inputs:
+    D_star      -> non-dimensional grain size 
+    d50         -> median grain diameter [m]  
+    
+    Output:
+    w_s         -> settling velocity [m/s]
+    '''
+    
+    nu = 2e-6
+    
+    if D_star**3 <= 16.187:
+        w_s = nu*(D_star**3)/(18*d50)
+    elif 16.187 < D_star**3 <= 16187: 
+        w_s = (10*nu/d50)*(np.sqrt(1 + 0.01*(D_star**3))-1)
+    elif D_star**3 > 16187:
+        w_s = 1.1*nu*(D_star**1.5)/d50
     
     return w_s
 
@@ -59,13 +52,13 @@ def P_c(eta, u_c, c_w, T_c, T_cu, delta_sc, w_s, alpha=8.2, xi=1.7):
     
     '''
     Inputs:
-    eta         -> ripple height    
-    u_c         -> peak crest orbital velocity    
-    c_w         -> wave speed
-    T_c         -> period of the crest (positive) half cycle
-    T_cu        -> period of accelerating flow within the crest half cycle
-    delta_sc    -> sheet flow layer thickness for the crest half cycle
-    w_s         -> particle settling velocity
+    eta         -> ripple height [m]    
+    u_c         -> peak crest orbital velocity [m/s] 
+    c_w         -> wave speed [m/s]
+    T_c         -> period of the crest half cycle [s]
+    T_cu        -> period of accelerating flow within the crest half cycle [s]
+    delta_sc    -> sheet flow layer thickness for the crest half cycle [m]
+    w_s         -> particle settling velocity [m/s]
     alpha       -> calibration coefficient (alpha=8.2 in VDA13)
     xi          -> calibration factor (xi=1.7 in VDA13)    
     
@@ -82,13 +75,13 @@ def P_t(eta, u_t, c_w, T_t, T_tu, delta_st, w_s, alpha=8.2, xi=1.7):
     
     '''
     Inputs:
-    eta         -> ripple height         
-    u_t         -> peak trough orbital velocity    
-    c_w         -> wave speed
-    T_t         -> period of the trough (negative) half cycle
-    T_tu        -> period of accelerating flow within the trough half cycle
-    delta_st    -> sheet flow layer thickness for the trough half cycle
-    w_s         -> particle settling velocity
+    eta         -> ripple height [m]       
+    u_t         -> peak trough orbital velocity [m/s]
+    c_w         -> wave speed [m/s]
+    T_t         -> period of the trough half cycle [s]
+    T_tu        -> period of accelerating flow within the trough half cycle [s]
+    delta_st    -> sheet flow layer thickness for the trough half cycle [m]
+    w_s         -> particle settling velocity [m/s]
     alpha       -> calibration coefficient (alpha=8.2 in VDA13)
     xi          -> calibration factor (xi=1.7 in VDA13)    
     
