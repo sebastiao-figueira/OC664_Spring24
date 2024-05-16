@@ -23,6 +23,9 @@ zbed = data.zbed(:,1); % vertical position of seabed (from sonar altimeter)
 % create time array for 21504 points at 2Hz. 2Hz = .5s time step
 t = (0:.5:21504 / 2 - .5)';
 
+figure(1)
+plot(t, u)
+
 % concatenate "u" and "t" to associate time data with velocity data
 u_with_t = [u, t];
 
@@ -133,11 +136,11 @@ end
 % all_waves 4th column is time at positive maxima
 % all_waves 5th column is time at negative maxima
 
-% figure(1)
-% plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1))
-% xlabel('t [s]');
-% ylabel('u [m/s]')
-% title('Example of Intra-Wave for Gauge 1')
+figure(1)
+plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1))
+xlabel('t [s]');
+ylabel('u [m/s]')
+title('Example of Intra-Wave for Gauge 1')
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
@@ -167,12 +170,12 @@ end
 % determine steady state current velocity, "u_delta"
 
 for i = 1:numel(all_waves)
-    u_delta{1, i} = mean(u_w{1, i}) ./ cos(phi);
+    u_delta(1, i) = mean(u_w{1, i}) ./ cos(phi);
 end
 
 % calculate u_x, time varying orbital velocity in x-direction
 for i = 1:numel(all_waves)
-    u_x{1, i} = u_w{1, i} + abs(u_delta{1, i}) .* cos(phi);
+    u_x{1, i} = u_w{1, i} + abs(u_delta(1, i)) .* cos(phi);
 end
 
 
@@ -182,9 +185,9 @@ end
 
 % calculate u_y, orbital velocity in y-direction
 
-for i = 1:numel(all_waves)
-    u_y{1, i} = abs(u_delta{1, i}) .* sin(phi);
-end
+% for i = 1:numel(all_waves)
+%     u_y{1, i} = abs(u_delta{1, i}) .* sin(phi);
+% end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
@@ -256,8 +259,8 @@ end
 
 % iterate to calculate u_crx and u_cry
 for i = 1:numel(all_waves)
-    u_crx(1, i) = u_tilda_cr(1, i) + abs(u_delta{1, i} * cos(phi));
-    u_cry(1, i) = abs(u_delta{1, i} * cos(phi));
+    u_crx(1, i) = u_tilda_cr(1, i) + abs(u_delta(1, i) * cos(phi));
+    u_cry(1, i) = abs(u_delta(1, i) * cos(phi));
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -270,7 +273,7 @@ end
 % iterate to calculate u_trx and u_try
 
 for i = 1:numel(all_waves)
-    u_trx(1, i) = -u_tilda_tr(1, i) + abs(u_delta{1, i} * cos(phi));
+    u_trx(1, i) = -u_tilda_tr(1, i) + abs(u_delta(1, i) * cos(phi));
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
