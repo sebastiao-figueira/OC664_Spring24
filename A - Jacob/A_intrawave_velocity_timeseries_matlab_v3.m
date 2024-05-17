@@ -21,7 +21,7 @@ zp = data.zp(:,1); % vertical position for p-sensor
 zbed = data.zbed(:,1); % vertical position of seabed (from sonar altimeter)
 
 % create time array for 21504 points at 2Hz. 2Hz = .5s time step
-t = (0:.5:21504 / 2 - .5)';
+t = (0:.5:21504 / 2 - .5)'; % time in s
 
 figure(1)
 plot(t, u)
@@ -136,7 +136,7 @@ end
 % all_waves 4th column is time at positive maxima
 % all_waves 5th column is time at negative maxima
 
-figure(1)
+figure(2)
 plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1))
 xlabel('t [s]');
 ylabel('u [m/s]')
@@ -260,7 +260,7 @@ end
 % iterate to calculate u_crx and u_cry
 for i = 1:numel(all_waves)
     u_crx(1, i) = u_tilda_cr(1, i) + abs(u_delta(1, i) * cos(phi));
-    u_cry(1, i) = abs(u_delta(1, i) * cos(phi));
+    % u_cry(1, i) = abs(u_delta(1, i) * cos(phi));
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -297,6 +297,15 @@ end
 for i = 1:numel(all_waves)
     c_w(1, i) = L_new(1, i) ./ T(1, i);
 end
+
+% create an output file of parameters needed for other parts of the project
+output_file = 'A_intrawave_velocity_timeseries_output_file.mat'; % file name
+
+% save the variables to a .mat file
+save(output_file, 'T', 'T_c', 'T_t', 'T_cu', 'T_tu', 'u_w', 'u_delta', 'u_x', ...
+    'u_hat', 'u_hat_c', 'u_hat_t', 'a_hat', 'u_tilda_cr', 'u_tilda_tr', ...
+    'u_crx', 'u_trx', 'c_w');
+
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
