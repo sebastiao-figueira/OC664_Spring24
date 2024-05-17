@@ -23,8 +23,27 @@ zbed = data.zbed(:,1); % vertical position of seabed (from sonar altimeter)
 % create time array for 21504 points at 2Hz. 2Hz = .5s time step
 t = (0:.5:21504 / 2 - .5)'; % time in s
 
-figure(1)
-plot(t, u)
+% convert time array to a time_serial for purposes of plotting only
+% dur = duration(2, 59, 12, 'Format', 'hh:mm');
+dur = seconds(t);
+time_serial = datenum(dur);
+
+fig = figure(1);
+plot(time_serial, u)
+xlabel('t [hh:mm]');
+ylabel('u [m/s]');
+title('Measured Near-Bed Velocities at Gauge 1 (Closest to Shore)')
+datetick('x', 'HH:MM', 'keeplimits');
+xlim([0 .1250]);
+hold on
+reference_line = plot(get(gca, 'XLim'), [0 0], 'r-', 'LineWidth', 1.5);
+legend('u', 'Reference Line (y = 0)', 'Location', 'northeast');
+hold off;
+% print(fig, 'PicName', '-dpng');
+ax = gca;
+ax.FontSize = 20;
+
+
 
 % concatenate "u" and "t" to associate time data with velocity data
 u_with_t = [u, t];
@@ -137,10 +156,14 @@ end
 % all_waves 5th column is time at negative maxima
 
 figure(2)
-plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1))
+plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1), 'linewidth', 2)
 xlabel('t [s]');
-ylabel('u [m/s]')
+ylabel('u [m/s]');
 title('Example of Intra-Wave for Gauge 1')
+grid on
+ax = gca;
+ax.FontSize = 20;
+
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
