@@ -18,14 +18,14 @@ import numpy as np
     #fw_t=wave friction factor at trough [COLIN] (eqn 21)
     #rho=density of seawater in kg/m^3 [SEBAS]
     #cw=wave speed where cw=L/T, L=wavelength, T=wave period, from LWT [LUIS]
-    #fw_Delt=full-cycle wave friction factor [COLIN] (eqn A.4)
+    #fw_swart=Swart's friction factor from appendix A.4 [COLIN] (eqn A.4)
     #uc_r=representative half-cycle wave-current velocity at crest [JACOB] (eqn 12)
     #ut_r=representative half-cycle wave-current velocity at trough [JACOB] (eqn 13)
     #s=specific gravity [SEBAS] (section 2 of VDA13)
     #g=constant of gravitational acceleration [SEBAS]
     #d50=median grain size of sediment [SEBAS]
 
-def currentfric(u_deltamag,uhat,ksdelta,fw_c,fw_t,rho,fw_Delt,cw,uc_r,ut_r,s,g,d50):
+def currentfric(u_deltamag,uhat,ksdelta,fw_c,fw_t,rho,fw_swart,cw,uc_r,ut_r,s,g,d50):
     #assumed wave boundary layer thickness (see section 6 VDA13)
     delta=0.2 #[m]
     #compare current vs wave orbital velocity(eqn 19)
@@ -37,6 +37,7 @@ def currentfric(u_deltamag,uhat,ksdelta,fw_c,fw_t,rho,fw_Delt,cw,uc_r,ut_r,s,g,d
     fwdelt_t=np.multiply(alpha,fdelta)+np.multiply((1-alpha),fw_t) #[-]
     #wave Reynolds stress TwRe (eqn 22)
     alpha_w=0.424 #dimensionless scale factor
+    fw_Delt=np.multiply(alpha,fdelta)+np.multiply((1-alpha),fw_swart) #[-] full-cycle wave-current friction factor
     TwRe=np.multiply(np.divide((rho*fw_Delt),2*cw),alpha_w*uhat**3)
     #Shields magnitude at crest (theta_cmag) and trough (theta_tmag) (eqn 17)
     theta_cmag=np.divide(np.multiply(0.5*fwdelt_c,(np.abs(uc_r))**2),((s-1)*g*d50))
