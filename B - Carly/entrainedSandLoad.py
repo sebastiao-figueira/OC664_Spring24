@@ -67,11 +67,13 @@ def sandload_crest(theta_c, theta_cr, m: float = 11.0, n: float = 1.2):
     theta_cr : float
         Critical Shields number
     """
-
-    if theta_c > theta_cr:
-        omega_c = m * (theta_c - theta_cr) ** n
-    else:
-        omega_c = 0
+    omega_c = np.array()
+    for val in theta_c:
+        if val > theta_cr:
+            omega_c_single = m * (theta_c - theta_cr) ** n
+        else:
+            omega_c_single = 0
+    omega_c.add(omega_c_single)
     return omega_c
 
 
@@ -92,11 +94,13 @@ def sandload_trough(theta_t, theta_cr, m, n):
     theta_cr : float
         Critical Shields number
     """
-
-    if theta_t > theta_cr:
-        omega_t = m * (theta_t - theta_cr) ** n
-    else:
-        omega_t = 0
+    omega_t = np.array()
+    for val in theta_t:
+        if theta_t > theta_cr:
+            omega_t_single = m * (theta_t - theta_cr) ** n
+        else:
+            omega_t_single = 0
+    omega_t.add(omega_t_single)
     return omega_t
 
 # then omega_c and omega_t go into Phase lag formulas
