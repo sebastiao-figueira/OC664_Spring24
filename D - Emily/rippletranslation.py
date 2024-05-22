@@ -32,7 +32,7 @@ import numpy as np
 
 def ripples(d50, d90, s, g, ahat, shields_aa):
     # Maximum mobility number
-    psimax = (max(u))**2 / ((s - 1) * g * d50)
+    psimax = (max(u_hat))**2 / ((s - 1) * g * d50)
 
     # Lambda multipliers m
     if d50 <= 0.22:
@@ -62,7 +62,7 @@ def ripples(d50, d90, s, g, ahat, shields_aa):
     eta = ahat * meta * n * (0.275 - ((0.022 * psimax)**0.42))
 
     # Ripple length (lambda) equation
-    lambda = ahat * mlambda * n * (1.97 - ((0.44 * psimax)**0.21))
+    lambda_ = ahat * mlambda * n * (1.97 - ((0.44 * psimax)**0.21))
 
     # Factor mu for fine sand adjustment
     if d50 <= 0.15:
