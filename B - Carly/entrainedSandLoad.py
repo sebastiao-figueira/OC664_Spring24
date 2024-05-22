@@ -9,7 +9,7 @@ def dimensionless_grainsize(d: float = 0.2, g: float = 9.81, rho_s: float = 2650
     Parameters
     ----------
     d : float
-        Grain diameter (default is 0.2)
+        Grain diameter (default is 0.2mm)
     g : float
         Acceleration due to gravity (default is 9.81)
     rho_s : float
@@ -24,7 +24,7 @@ def dimensionless_grainsize(d: float = 0.2, g: float = 9.81, rho_s: float = 2650
     d_star : float
         Dimensionless grain size
     """
-
+    d = d * 0.001
     d_star = d * (g * ((rho_s / rho) - 1) / nu ** 2) ** (1 / 3)
     return d_star
 
@@ -67,17 +67,20 @@ def sandload_crest(theta_c, theta_cr, m: float = 11.0, n: float = 1.2):
     theta_cr : float
         Critical Shields number
     """
-    omega_c = np.array()
-    for val in theta_c:
-        if val > theta_cr:
-            omega_c_single = m * (theta_c - theta_cr) ** n
+
+    omega_c = np.empty(len(theta_c))
+    for i in range(len(theta_c)):
+        if theta_c[i] > theta_cr:
+            omega_c_single = m * (theta_c[i] - theta_cr) ** n
         else:
             omega_c_single = 0
-    omega_c.add(omega_c_single)
+
+        omega_c[i] = omega_c_single
+
     return omega_c
 
 
-def sandload_trough(theta_t, theta_cr, m, n):
+def sandload_trough(theta_t, theta_cr, m: float = 11.0, n: float = 1.2):
     """Calculates sand load for crest half-cycle.
     Parameters
     ----------
@@ -94,13 +97,24 @@ def sandload_trough(theta_t, theta_cr, m, n):
     theta_cr : float
         Critical Shields number
     """
-    omega_t = np.array()
-    for val in theta_t:
-        if theta_t > theta_cr:
-            omega_t_single = m * (theta_t - theta_cr) ** n
+    omega_t = np.empty(len(theta_t))
+    for i in range(len(theta_t)):
+        if theta_t[i] > theta_cr:
+            omega_t_single = m * (theta_t[i] - theta_cr) ** n
         else:
             omega_t_single = 0
-    omega_t.add(omega_t_single)
+        omega_t[i] = omega_t_single
+
     return omega_t
 
 # then omega_c and omega_t go into Phase lag formulas
+
+# TEST
+dstar = dimensionless_grainsize()
+theta_critical = critical_shields(dstar)
+
+input_thetac = np.random.rand(100, 1)
+input_thetat = np.random.rand(100, 1)
+
+sandload_c = sandload_crest(input_thetac, theta_critical)
+sandload_t = sandload_trough(input_thetat, theta_critical)
