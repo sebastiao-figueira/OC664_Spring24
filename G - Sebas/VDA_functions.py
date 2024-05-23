@@ -254,3 +254,97 @@ class modelfunctions:
             sfl.append(np.nan)
 
         return np.array(sfl).flatten() * (d50 / 1000)  # conversion back to m
+    
+    # %% Luis' function
+    @staticmethod
+    def phaseLagSingle(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
+        '''
+        Inputs:
+        s           -> specific gravity of the sediment (considering quartz)
+        d50         -> median grain diameter [m]
+        eta         -> ripple height [m]
+        u_hat_c     -> peak crest orbital velocity [m/s]
+        u_hat_t     -> peak trough orbital velocity [m/s]
+        c_w         -> wave speed [m/s]
+        T_c         -> period of the crest half cycle [s]
+        T_cu        -> period of accelerating flow within the crest half cycle [s]
+        delta_sc    -> sheet flow layer thickness for the crest half cycle [m]
+        T_t         -> period of the trough half cycle [s]
+        T_tu        -> period of accelerating flow within the trough half cycle [s]
+        delta_st    -> sheet flow layer thickness for the trough half cycle [m]
+        omega_c     -> sand load entrained during the wave crest period
+        omega_t     -> sand load entrained during the wave trough period
+        alpha       -> calibration coefficient (alpha=8.2 in VDA13)
+        xi          -> calibration factor (xi=1.7 in VDA13)
+        g           -> gravitational acceleration [m/s^2] (default 9.81)
+        nu          -> kinematic viscosity of water [m^2/s] (default 2e-6)
+        
+        Outputs:
+        omega_cc    -> sand load entrained during the wave crest period and transported during the crest period
+        omega_ct    -> sand load entrained during the wave crest period and transported during the trough period
+        omega_tt    -> sand load entrained during the wave trough period and transported during the trough period
+        omega_tc    -> sand load entrained during the wave trough period and transported during the crest period
+        '''
+
+        # Non-dimensional grain size
+        D_star = ((g * (s - 1) / (nu**2))**(1 / 3)) * d50
+
+        # Settling velocity [m/s] (following van Rijn (1984))
+        if D_star**3 <= 16.187:
+            w_s = nu * (D_star**3) / (18 * d50)
+        elif 16.187 < D_star**3 <= 16187:
+            w_s = (10 * nu / d50) * (np.sqrt(1 + 0.01 * (D_star**3)) - 1)
+        elif D_star**3 > 16187:
+            w_s = 1.1 * nu * (D_star**1.5) / d50
+
+        # Phase lag parameters for the crest half cycle (P_c) and trough half cycle (P_t)
+        if eta > 0:    # Ripple regime
+            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
+            
+        elif eta == 0: # Sheet flow regime
+            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
+
+        # Sand load entrainment during wave cycles
+        if P_c <= 1:
+            omega_cc = omega_c
+            omega_ct = 0
+        elif P_c > 1:
+            omega_cc = omega_c / P_c
+            omega_ct = (1 - 1 / P_c) * omega_c
+
+        if P_t <= 1:
+            omega_tt = omega_t
+            omega_tc = 0
+        elif P_t > 1:
+            omega_tt = omega_t / P_t
+            omega_tc = (1 - 1 / P_t) * omega_t
+
+        return omega_cc, omega_ct, omega_tt, omega_tc
+    
+    @staticmethod
+    def phaseLag(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
+        '''
+        Same as phaseLag above but works with vectors!
+        '''
+    
+        omega_cc = []
+        omega_ct = []
+        omega_tt = []
+        omega_tc = []
+        
+        for i in range(len(eta)):
+            omega_cc_temp, omega_ct_temp, omega_tt_temp, omega_tc_temp = modelfunctions.phaseLagSingle(s, d50, eta[i], u_hat_c[i], u_hat_t[i], c_w[i], T_c[i], T_cu[i], delta_sc[i], T_t[i], T_tu[i], delta_st[i], omega_c[i], omega_t[i], alpha=8.2, xi=1.7)
+        
+            omega_cc.append(omega_cc_temp)
+            omega_ct.append(omega_ct_temp)
+            omega_tt.append(omega_tt_temp)
+            omega_tc.append(omega_tc_temp)
+        
+        omega_cc = np.array(omega_cc)
+        omega_ct = np.array(omega_ct)
+        omega_tt = np.array(omega_tt)
+        omega_tc = np.array(omega_tc)
+        
+        return omega_cc, omega_ct, omega_tt, omega_tc

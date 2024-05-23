@@ -54,3 +54,5 @@ omega_t = vda.modelfunctions.sandload_trough(theta_tx, shields_cr)
 sheetflow_thickness_c = vda.modelfunctions.sfl_thickness(theta_cmag, d50)
 sheetflow_thickness_t = vda.modelfunctions.sfl_thickness(theta_tmag, d50)
 
+# Luis output:
+omega_cc, omega_ct, omega_tt, omega_tc = vda.modelfunctions.phaseLag(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, sheetflow_thickness_c, T_t, T_tu, sheetflow_thickness_t, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6)
