@@ -159,7 +159,7 @@ end
 % all_waves 4th column is time at positive maxima
 % all_waves 5th column is time at negative maxima
 
-figure(2)
+figure();
 plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1), 'linewidth', 2)
 xlabel('t [s]');
 ylabel('u [m/s]');
@@ -327,9 +327,9 @@ end
 output_file = 'A_intrawave_velocity_timeseries_output_file.mat'; % file name
 
 % save the variables to a .mat file
-% save(output_file, 'T', 'T_c', 'T_t', 'T_cu', 'T_tu', 'u_w', 'u_delta', 'u_x', ...
-%     'u_hat', 'u_hat_c', 'u_hat_t', 'a_hat', 'u_tilda_cr', 'u_tilda_tr', ...
-%     'u_crx', 'u_trx', 'c_w');
+save(output_file, 'T', 'T_c', 'T_t', 'T_cu', 'T_tu', 'u_w', 'u_delta', 'u_x', ...
+    'u_hat', 'u_hat_c', 'u_hat_t', 'a_hat', 'u_tilda_cr', 'u_tilda_tr', ...
+    'u_crx', 'u_trx', 'c_w');
 
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
