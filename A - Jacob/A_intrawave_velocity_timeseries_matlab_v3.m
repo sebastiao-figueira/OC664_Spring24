@@ -251,15 +251,13 @@ for i = 1:numel(all_waves)
     a_hat(1, i) = (u_hat(1, i) .* T(1, i)) ./ (2 * pi);
 end
 
-
-
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 % eqn (10): u_tilda_cr = (1 / 2) * sqrt(2) * u_hat_c;
 
 % iterate to calculate u_tilda_cr for each wave
 
-for j = 1:numel(all_waves)
+for i = 1:numel(all_waves)
     u_tilda_cr(1, i) = (1 / 2) .* sqrt(2) .* u_hat_c(1, i);
 end
 
