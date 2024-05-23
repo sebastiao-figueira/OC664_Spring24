@@ -70,5 +70,4 @@ delta_st = vda.modelfunctions.sfl_thickness(theta_tmag, d50)
 omega_cc, omega_ct, omega_tt, omega_tc = vda.modelfunctions.phaseLag(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6)
 
 # Output D_star, w_s, omega_cc, omega_ct, omega_tt, omega_tc
-
 # Choose highest values for the omegas and output the wave shape?
