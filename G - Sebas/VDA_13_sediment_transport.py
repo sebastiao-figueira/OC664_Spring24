@@ -52,4 +52,7 @@ def VDA_13_sediment_transport(omega, wave_period, shields, rho=1000, rho_s=2650,
     # Calculate net sediment transport rate
     q_s = (q_c + q_t) * np.sqrt((s - 1) * g * d_50 ** 3) / T
     
-    return q_s
+    # Sum sediment transport over selected time period
+    q_sum = sum(q_s)
+    
+    return q_s, q_sum
