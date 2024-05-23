@@ -95,7 +95,7 @@ class modelfunctions:
                 f_wc[i] = 0.3
                 f_wt[i] = 0.3
 
-        return shields_aa, f_wc, f_wt, ksdelta, ksw, fdelta, f_w
+        return shields_aa, f_wc, f_wt, ksdelta, ksw, fdelta, f_w, eta
 
     # %% Maggie's function
     @staticmethod

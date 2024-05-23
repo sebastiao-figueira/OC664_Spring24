@@ -35,9 +35,8 @@ u_trx = mat['u_trx'][0]
 u_w = mat['u_w'][0]
 u_x = mat['u_x'][0]
 
-
 # Colin/Emily output:
-shields_aa, f_wc, f_wt, ksdelta, ksw, fdelta, f_w = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
+shields_aa, f_wc, f_wt, ksdelta, ksw, fdelta, f_w, eta = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
                                                                               u_delta, delta, d50, d90, s, g)
 # Maggie output:
 fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.modelfunctions.currentfric(u_delta, u_hat, f_wc, f_wt, rho, f_w,
