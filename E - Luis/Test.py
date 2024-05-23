@@ -25,27 +25,38 @@ u_hat_c    = mat['u_hat_c'][0]
 u_hat_t    = mat['u_hat_t'][0]
 c_w        = mat['c_w'][0]
 
+a_hat      = mat['a_hat'][0]
+T          = mat['T'][0]
+u_crx      = mat['u_crx'][0]
+u_delta    = mat['u_delta'][0]
+u_hat      = mat['u_hat'][0]
+u_tilda_cr = mat['u_tilda_cr'][0]
+u_tilda_tr = mat['u_tilda_tr'][0]
+u_trx      = mat['u_trx'][0]
+u_w        = mat['u_w'][0]
+u_x        = mat['u_x'][0]
+
 #%% Constants 
 
-g          = 9.81                                         # Gravitational acceleration [m/s^2]
-nu         = 2e-6                                         # Kinematic viscosity of water [m^2/s]
-d50        = 0.2/1000                                     # Median grain diameter [m]
-d90        = 0.00025                                      # mm; value taken from: "Uncertainty in Nearshore Sand Bar Migration" which had d90 of 0.00024. We rounded up slightly given that our d50 is also larger than that paper's d50.
-delta      = 0.2                                          # m
-rho        = 1025                                         # Seawater density [kg/m^3]
-rho_s      = 2650                                         # 
-s          = rho_s / rho                                  # Specific gravity of the sediment (considering quartz)
+g          = 9.81            # Gravitational acceleration [m/s^2]
+nu         = 2e-6            # Kinematic viscosity of water [m^2/s]
+d50        = 0.2/1000        # Median grain diameter [m]
+d90        = 0.00025         # [mm] value taken from: "Uncertainty in Nearshore Sand Bar Migration" which had d90 of 0.00024. We rounded up slightly given that our d50 is also larger than that paper's d50.
+delta      = 0.2             # [m]
+rho        = 1025            # Seawater density [kg/m^3]
+rho_s      = 2650            # Sediment density [kg/m^3]
+s          = rho_s / rho     # Specific gravity of the sediment (considering quartz)
 
 #%%
 
-def combined_function(s, d50, eta, u_c, u_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7):
+def phaseLag(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7):
     '''
     Inputs:
     s           -> specific gravity of the sediment (considering quartz)
     d50         -> median grain diameter [m]
     eta         -> ripple height [m]
-    u_c         -> peak crest orbital velocity [m/s]
-    u_t         -> peak trough orbital velocity [m/s]
+    u_hat_c     -> peak crest orbital velocity [m/s]
+    u_hat_t     -> peak trough orbital velocity [m/s]
     c_w         -> wave speed [m/s]
     T_c         -> period of the crest half cycle [s]
     T_cu        -> period of accelerating flow within the crest half cycle [s]
@@ -59,11 +70,14 @@ def combined_function(s, d50, eta, u_c, u_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu
     xi          -> calibration factor (xi=1.7 in VDA13)
     
     Outputs:
-    results     -> dictionary containing all computed values
+    omega_cc    -> sand load entrained during the wave crest period and transported during the crest period
+    omega_ct    -> sand load entrained during the wave crest period and transported during the trough period
+    omega_tt    -> sand load entrained during the wave trough period and transported during the trough period
+    omega_tc    -> sand load entrained during the wave trough period and transported during the crest period
     '''
 
     # Calculate non-dimensional grain size
-    D_star = ((g * (s - 1) / (nu**2))**(1 / 3)) * d50
+    D_star = ((g * (s - 1) / (nu**2))**(1 / 3)) * d50; print(D_star)
 
     # Calculate settling velocity
     if D_star**3 <= 16.187:
@@ -75,15 +89,15 @@ def combined_function(s, d50, eta, u_c, u_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu
 
     # Calculate phase lag parameters for the crest half cycle
     if eta > 0:
-        P_c = alpha * ((1 - xi * u_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
+        P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
     else:
-        P_c = alpha * ((1 - xi * u_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
+        P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
 
     # Calculate phase lag parameters for the trough half cycle
     if eta > 0:
-        P_t = alpha * ((1 - xi * u_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
+        P_t = alpha * ((1 - xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
     else:
-        P_t = alpha * ((1 - xi * u_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
+        P_t = alpha * ((1 - xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
 
     # Calculate sand load entrainment during wave cycles
     if P_c <= 1:
@@ -100,19 +114,7 @@ def combined_function(s, d50, eta, u_c, u_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu
         omega_tt = omega_t / P_t
         omega_tc = (1 - 1 / P_t) * omega_t
 
-    # Return results in a dictionary
-    results = {
-        'D_star': D_star,
-        'w_s': w_s,
-        'P_c': P_c,
-        'P_t': P_t,
-        'omega_cc': omega_cc,
-        'omega_ct': omega_ct,
-        'omega_tt': omega_tt,
-        'omega_tc': omega_tc
-    }
-
-    return results
+    return omega_cc, omega_ct, omega_tt, omega_tc
 
 # Colin/Emily output:
 shields_aa, f_wc, f_wt, ksdelta, ksw, fdelta, f_w, eta = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
@@ -122,11 +124,15 @@ fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.model
                                                                                    c_w, u_crx, u_trx, s, g, d50, fdelta)
 
 # Carly output:
-dstar = vda.modelfunctions.dimensionless_grainsize(d50)
+dstar      = vda.modelfunctions.dimensionless_grainsize(d50)
 shields_cr = vda.modelfunctions.critical_shields(dstar)
-omega_c = vda.modelfunctions.sandload_crest(theta_cx, shields_cr)
-omega_t = vda.modelfunctions.sandload_trough(theta_tx, shields_cr)
+omega_c    = vda.modelfunctions.sandload_crest(theta_cx, shields_cr)
+omega_t    = vda.modelfunctions.sandload_trough(theta_tx, shields_cr)
 
 # Carson output:
-sheetflow_thickness_c = vda.modelfunctions.sfl_thickness(theta_cmag, d50)
-sheetflow_thickness_t = vda.modelfunctions.sfl_thickness(theta_tmag, d50)
+delta_sc = vda.modelfunctions.sfl_thickness(theta_cmag, d50)
+delta_st = vda.modelfunctions.sfl_thickness(theta_tmag, d50)
+
+#%% Outputs
+
+omega_cc, omega_ct, omega_tt, omega_tc = phaseLag(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7)
