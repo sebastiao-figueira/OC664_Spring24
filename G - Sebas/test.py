@@ -47,8 +47,7 @@ fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.model
 # Carly output:
 dstar = vda.modelfunctions.dimensionless_grainsize(d50)
 shields_cr = vda.modelfunctions.critical_shields(dstar)
-omega_c = vda.modelfunctions.sandload_crest(theta_cx, shields_cr)
-omega_t = vda.modelfunctions.sandload_trough(theta_tx, shields_cr)
+omega_c, omega_t = vda.modelfunctions.sandload(theta_cx, theta_tx, shields_cr)
 
 # Carson output:
 sheetflow_thickness_c = vda.modelfunctions.sfl_thickness(theta_cmag, d50)

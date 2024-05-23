@@ -170,39 +170,12 @@ class modelfunctions:
     # If shields_c and shields_t are actually arrays, will need to loop through each value,
     # but this is the correct logic
     @staticmethod
-    def sandload_crest(theta_c, theta_cr, m: float = 11.0, n: float = 1.2):
+    def sandload(theta_c, theta_t, theta_cr, m: float = 11.0, n: float = 1.2):
         """Calculates sand load for crest half-cycle.
         Parameters
         ----------
         theta_c
             Shields Number for crest half cycle
-        theta_cr : float
-            Critical Shields number
-        m : float
-            Proportionality constant (default is 11.0 from van der A et al. 2013)
-        n : float
-            Power constant (default is 1.2 from van der A et al. 2013)
-        Returns
-        -------
-        theta_cr : float
-            Critical Shields number
-        """
-
-        omega_c = []
-        for val in theta_c:
-            if val > theta_cr:
-                omega_c_single = m * (val - theta_cr) ** n
-            else:
-                omega_c_single = 0
-            omega_c.append(omega_c_single)
-        omega_c = np.array(omega_c)
-        return omega_c
-
-    @staticmethod
-    def sandload_trough(theta_t, theta_cr, m: float = 11.0, n: float = 1.2):
-        """Calculates sand load for crest half-cycle.
-        Parameters
-        ----------
         theta_t
             Shields Number for trough half cycle
         theta_cr : float
@@ -213,9 +186,21 @@ class modelfunctions:
             Power constant (default is 1.2 from van der A et al. 2013)
         Returns
         -------
-        theta_cr : float
-            Critical Shields number
+        theta_c : np.array
+            Array of sand load under crest half cycle
+        theta_t : np.array
+            Array of sand load under trough half cycle
         """
+
+        omega_c = []
+        for val in theta_c:
+            if val > theta_cr:
+                omega_c_single = m * (val - theta_cr) ** n
+            else:
+                omega_c_single = 0
+            omega_c.append(omega_c_single)
+        omega_c = np.array(omega_c)
+
         omega_t = []
         for val in theta_t:
             if val > theta_cr:
@@ -224,7 +209,8 @@ class modelfunctions:
                 omega_t_single = 0
             omega_t.append(omega_t_single)
         omega_t = np.array(omega_t)
-        return omega_t
+
+        return omega_c, omega_t
 
     # %% Carson's function
     @staticmethod
