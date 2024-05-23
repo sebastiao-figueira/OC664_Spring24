@@ -95,7 +95,7 @@ class modelfunctions:
                 f_wc[i] = 0.3
                 f_wt[i] = 0.3
 
-        return shields_aa, f_wc, f_wt, ksdelta, ksw, fdelta, f_w, eta
+        return f_wc, f_wt, fdelta, f_w, eta
 
     # %% Maggie's function
     @staticmethod
@@ -124,7 +124,7 @@ class modelfunctions:
     # D_star (Soulsby 1997)
     @staticmethod
     def dimensionless_grainsize(d: float = 0.0002, g: float = 9.81, rho_s: float = 2650.0,
-                                rho: float = 1000.0, nu: float = 0.00001):
+                                rho: float = 1000.0, nu: float = 2e-6):
         """Calculates dimensionless grain size, D*.
         Parameters
         ----------
@@ -137,7 +137,7 @@ class modelfunctions:
         rho : float
             Density of water (default is 1000.0)
         nu : float
-            Kinematic viscosity of water (default is 0.00001)
+            Kinematic viscosity of water (default is 2e-6)
 
         Returns
         -------
@@ -243,7 +243,7 @@ class modelfunctions:
     
     # %% Luis' function
     @staticmethod
-    def phaseLagSingle(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
+    def phaseLagSingle(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
         '''
         Inputs:
         s           -> specific gravity of the sediment (considering quartz)
@@ -272,6 +272,9 @@ class modelfunctions:
         omega_tc    -> sand load entrained during the wave trough period and transported during the crest period
         '''
 
+        # Calculate specific gravity
+        s = rho_s / rho
+        
         # Non-dimensional grain size
         D_star = ((g * (s - 1) / (nu**2))**(1 / 3)) * d50
 
@@ -310,7 +313,7 @@ class modelfunctions:
         return omega_cc, omega_ct, omega_tt, omega_tc
     
     @staticmethod
-    def phaseLag(s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
+    def phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
         '''
         Same as phaseLag above but works with vectors!
         '''
@@ -320,8 +323,9 @@ class modelfunctions:
         omega_tt = []
         omega_tc = []
         
+        
         for i in range(len(eta)):
-            omega_cc_temp, omega_ct_temp, omega_tt_temp, omega_tc_temp = modelfunctions.phaseLagSingle(s, d50, eta[i], u_hat_c[i], u_hat_t[i], c_w[i], T_c[i], T_cu[i], delta_sc[i], T_t[i], T_tu[i], delta_st[i], omega_c[i], omega_t[i], alpha=8.2, xi=1.7)
+            omega_cc_temp, omega_ct_temp, omega_tt_temp, omega_tc_temp = modelfunctions.phaseLagSingle(rho, rho_s, d50, eta[i], u_hat_c[i], u_hat_t[i], c_w[i], T_c[i], T_cu[i], delta_sc[i], T_t[i], T_tu[i], delta_st[i], omega_c[i], omega_t[i], alpha=8.2, xi=1.7)
         
             omega_cc.append(omega_cc_temp)
             omega_ct.append(omega_ct_temp)
@@ -334,3 +338,47 @@ class modelfunctions:
         omega_tc = np.array(omega_tc)
         
         return omega_cc, omega_ct, omega_tt, omega_tc
+    
+    @staticmethod
+    def sediment_transport(omega, wave_period, shields, rho=1000, rho_s=2650, d_50=0.0002, g=9.81):
+        """
+        Calculate the net transport rate induced by non-breaking waves and currents
+        based on the method set forth by van der A (2013).
+    
+        Args:
+            omega (array): Sand load entrainment and transport rates during different wave phases.
+            wave_period (array): Durations of wave phases.
+            shields (array): Magnitudes of Shields parameters and bed shear stresses.
+            rho (float): Water density (default: 1000 kg/m^3).
+            rho_s (float): Sediment density (default: 2650 kg/m^3).
+            d_50 (float): Median sediment grain size (default: 0.0002 m).
+            g (float): Acceleration due to gravity (default: 9.81 m/s^2).
+    
+        Returns:
+            float: Net sediment transport rate.
+        """
+        
+        # Check input array sizes
+        if len(omega) != 4 or len(wave_period) != 5 or len(shields) != 4:
+            raise ValueError("Input arrays must have sizes [4], [5], and [4] respectively.")
+    
+        
+        # Calculate s parameter
+        s = (rho_s - rho) / rho 
+        
+        # Extract values from input arrays
+        omega_cc, omega_ct, omega_tt, omega_tc = omega
+        T, T_c, T_cu, T_t, T_tu = wave_period
+        shields_c, shields_t, shields_cx, shields_tx = shields
+        
+        # Calculate transport rates
+        q_c = np.sqrt(shields_c) * T_c * (omega_cc + T_c / (2 * T_cu) * omega_tc) * shields_cx / shields_c
+        q_t = np.sqrt(shields_t) * T_t * (omega_tt + T_t / (2 * T_tu) * omega_ct) * shields_tx / shields_t
+        
+        # Calculate net sediment transport rate
+        q_s = (q_c + q_t) * np.sqrt((s - 1) * g * d_50 ** 3) / T
+        
+        # Sum sediment transport over selected time period
+        q_sum = sum(q_s)
+        
+        return q_s, q_sum
