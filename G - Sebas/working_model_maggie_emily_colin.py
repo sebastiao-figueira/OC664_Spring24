@@ -5,10 +5,10 @@ import numpy as np
 # %% Colin and Emily's function
 def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta, d50, d90, s, g):
     # Maximum mobility number
-    psimax = (1.27 * u_hat) ** 2 / ((s - 1) * g * d50)
+    psimax = (1.27 * u_hat) ** 2 / ((s - 1) * g * d50) # info in the VDA appendix indicated that 1.27 * uhat was an appropriate approximation for deriving the mobility number
 
     # Lambda multipliers m
-    mlambda = 0.73  # given our d50 this value is correct
+    mlambda = 0.73  # given our d50 this value is correct 
 
     # Eta multipliers
     meta = 0.55  # given our d50 this value is correct
@@ -18,7 +18,7 @@ def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta
 
     n = np.ones(np.shape(psimax))  # preallocating empty array
 
-    for i in range(0, len(psimax)):
+    for i in range(0, len(psimax)): # calculating n for the time series based on mobility number. n goes into ripple geometry
         if psimax[i] <= 190:
             n[i] = 1
         elif psimax[i] <= 240:
@@ -28,7 +28,7 @@ def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta
 
     eta = np.ones(np.shape(psimax))  # preallocating empty array
 
-    for i in range(0, len(psimax)):
+    for i in range(0, len(psimax)): # calculating ripple height
         eta[i] = meta * n[i] * a_hat[i] * (0.275 - (0.022 * (psimax[i] ** 0.42)))
 
     lambda_ = np.ones(np.shape(psimax))  # preallocating empty array
@@ -36,7 +36,7 @@ def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta
     for i in range(0, len(psimax)):  # Ripple length (lambda) equation
         lambda_[i] = mlambda * a_hat[i] * n[i] * (1.97 - 0.44 * (psimax[i] ** 0.21))
 
-    c1 = 2.6  # noted in VDA13, empirically derived
+    c1 = 2.6  # noted in VDA13, empirically derived. goes into half-cycle varying wave friction factor
 
     ksdelta = np.ones(np.shape(
         psimax)) * 0.5  # preallocating empty arrays; used 0.5 so as not to interfere with dummy variables below
@@ -61,7 +61,7 @@ def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta
                         (1 / 4) * np.multiply(f_w[i], (u_hat[i] ** 2)) / (
                             (s - 1) * g * d50))  # time averaged absolute shields stress
             rough[i] = d50 * (mu + 6 * (shields_aa[i] - 1))  # current-related bed roughness
-            if lambda_[i] == 0:
+            if lambda_[i] == 0: # if/else was necessary to remove division-by-zero errors when ripples are absent
                 ksw[i] = max(d50, rough[i])
             else:
                 ksw[i] = max(d50, rough[i]) + ((0.4 * eta[i] ** 2) / lambda_[i])  # Wave-related bed roughness
@@ -71,7 +71,7 @@ def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta
                     -0.19)))  # equation A.4; the Swart Equation. In the absence of acceleration skewness f_wc/f_wt below reduce to this
             else:
                 f_w[i] = 0.3
-            if lambda_[i] == 0:
+            if lambda_[i] == 0: # if/else was necessary to remove division-by-zero errors when ripples are absent
                 ksdelta[i] = max((3 * d90), rough[i])
             else:
                 ksdelta[i] = max((3 * d90), rough[i]) + np.divide((0.4 * eta[i] * 2),
@@ -83,7 +83,7 @@ def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta
 
     # Wave friction factor, separated out into crest and trough half cycles to account for acceleration skewness
 
-    for i in range(0, len(psimax)):
+    for i in range(0, len(psimax)): # VDA equation 21
         if a_hat[i] / ksw[i] > 1.587:
             f_wc[i] = 0.00251 * np.exp(5.21 * ((((2 * T_cu[i] / T_c[i]) ** c1) * a_hat[i]) / ksw[i]) ** (-0.19))
             f_wt[i] = 0.00251 * np.exp(5.21 * ((((2 * T_tu[i] / T_t[i]) ** c1) * a_hat[i]) / ksw[i]) ** (-0.19))
