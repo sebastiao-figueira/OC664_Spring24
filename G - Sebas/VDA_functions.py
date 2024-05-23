@@ -195,6 +195,7 @@ class modelfunctions:
             else:
                 omega_c_single = 0
             omega_c.append(omega_c_single)
+        omega_c = np.array(omega_c)
         return omega_c
 
     @staticmethod
@@ -222,6 +223,7 @@ class modelfunctions:
             else:
                 omega_t_single = 0
             omega_t.append(omega_t_single)
+        omega_t = np.array(omega_t)
         return omega_t
 
     # %% Carson's function
@@ -244,7 +246,7 @@ class modelfunctions:
         sfl = []
         if d50 <= 0.15:
             sfl.append(25 * shield)
-        elif 0.15 <= d50 <= 0.20:
+        elif 0.15 < d50 < 0.20:
             sfl.append(25 - (12 * (d50 - 0.15)) / (0.20 - 0.15))
         elif d50 >= 0.20:
             sfl.append(13 * shield)

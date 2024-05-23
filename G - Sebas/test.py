@@ -10,8 +10,10 @@ delta = 0.2  # m
 d50 = 0.0002  # mm; this was given in our midterm so we've followed the same assumptions
 d90 = 0.00025  # mm; value taken from: "Uncertainty in Nearshore Sand Bar Migration" which had d90 of 0.00024. We rounded up slightly given that our d50 is also larger than that paper's d50.
 g = 9.81
+# check this
 rho = 1025
 rho_s = 2650
+# check this
 s = rho_s / rho
 
 # Load Jacob's output
@@ -51,3 +53,4 @@ omega_t = vda.modelfunctions.sandload_trough(theta_tx, shields_cr)
 # Carson output:
 sheetflow_thickness_c = vda.modelfunctions.sfl_thickness(theta_cmag, d50)
 sheetflow_thickness_t = vda.modelfunctions.sfl_thickness(theta_tmag, d50)
+
