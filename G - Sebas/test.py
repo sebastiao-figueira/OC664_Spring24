@@ -1,5 +1,5 @@
 import numpy as np
-import scipy
+import scipy.io
 import VDA_functions as vda
 
 # TEST MODEL HERE

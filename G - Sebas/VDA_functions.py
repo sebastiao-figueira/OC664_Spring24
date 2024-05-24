@@ -10,87 +10,112 @@ class modelfunctions:
         # Maximum mobility number
         psimax = (1.27 * u_hat) ** 2 / ((s - 1) * g * d50)
 
-        # Lambda multipliers m
-        mlambda = 0.73  # given our d50 this value is correct
+        # diamteter in mm for mlambda and meta
+        d50_mm = 1000 * d50
+        
+        # Equation B.4 in VDA13
+        if d50_mm <= 0.22:
+            mlambda = 0.73
+        elif 0.22 < d50_mm < 0.3:
+            mlambda = 0.73 + (0.27 * (d50_mm - 0.22)) / (0.3 - 0.22)
+        else:
+            mlambda = 1
 
-        # Eta multipliers
-        meta = 0.55  # given our d50 this value is correct
+        # Equation B.3 in VDA13
+        if d50_mm <= 0.22:
+            meta = 0.55
+        elif 0.22 < d50_mm < 0.3:
+            meta = 0.55 + (0.45 * (d50_mm - 0.22)) / (0.3 - 0.22)
+        else:
+            meta = 1
 
-        # Factor mu for fine sand adjustment
-        mu = 1  # given our d50 this value is correct
+        # Equation A.2 from VDA13
+        if d50_mm <= 0.15:
+            mu = 6
+        elif 0.15 < d50_mm < 0.2:
+            mu = 6 - (5 * (d50_mm - 0.15)) / (0.2 - 0.15)
+        else:
+            mu = 1
 
-        n = np.ones(np.shape(psimax))  # preallocating empty array
-
+        # Equation B.5 in VDA13
+        n = np.ones(np.shape(psimax)) # preallocating empty array
+            
         for i in range(0, len(psimax)):
             if psimax[i] <= 190:
                 n[i] = 1
-            elif psimax[i] <= 240:
+            elif 190 < psimax[i] < 240:
                 n[i] = 0.5 * (1 + np.cos(np.pi * (psimax[i] - 190) / 50))
-            elif psimax[i] > 240:
+            else:
                 n[i] = 0
-
-        eta = np.ones(np.shape(psimax))  # preallocating empty array
-
+    
+        # Equation B.1 in VDA13
+        eta = np.ones(np.shape(psimax)) # preallocating empty array
+            
         for i in range(0, len(psimax)):
-            eta[i] = meta * n[i] * a_hat[i] * (0.275 - (0.022 * (psimax[i] ** 0.42)))
-
-        lambda_ = np.ones(np.shape(psimax))  # preallocating empty array
-
-        for i in range(0, len(psimax)):  # Ripple length (lambda) equation
-            lambda_[i] = mlambda * a_hat[i] * n[i] * (1.97 - 0.44 * (psimax[i] ** 0.21))
-
-        c1 = 2.6  # noted in VDA13, empirically derived
-
-        ksdelta = np.ones(np.shape(
-            psimax)) * 0.5  # preallocating empty arrays; used 0.5 so as not to interfere with dummy variables below
-        fdelta = np.ones(np.shape(psimax)) * 0.5
-        shields_aa = np.ones(np.shape(psimax)) * 0.5
-        rough = np.ones(np.shape(psimax)) * 0.5
-        ksw = np.ones(np.shape(psimax)) * 0.5
-        f_w = np.ones(np.shape(psimax)) * 0.5
-
+            eta[i] = meta * n[i] * a_hat[i] * (0.275 - 0.022 * psimax[i]**0.42)
+    
+        # Equation B.2 in VDA13
+        lambda_ = np.ones(np.shape(psimax)) # preallocating empty array
+    
+        for i in range(0, len(psimax)): # Ripple length (lambda) equation
+            lambda_[i] = mlambda * a_hat[i] * n[i] * (1.97 - 0.44 * psimax[i]**0.21)
+            
+        c1 = 2.6 # noted in VDA13, empirically derived        
+    
+        ksdelta = np.ones(np.shape(psimax))*0.5 # preallocating empty arrays; used 0.5 so as not to interfere with dummy variables below
+        fdelta = np.ones(np.shape(psimax))*0.5
+        shields_aa = np.ones(np.shape(psimax))*0.5
+        rough = np.ones(np.shape(psimax))*0.5
+        ksw = np.ones(np.shape(psimax))*0.5
+        f_w = np.ones(np.shape(psimax))*0.5
+    
         # Iterative part
-        epsilon = 0.000000001  # tolerance to determine convergence
-
+        epsilon = 0.000000001 # tolerance to determine convergence
+        
+    
         for i in range(0, len(psimax)):
-            new_calc = 1  # arbitrary initial guess
-            last_calc = 0  # arbitrary arbitrary starting point for comparison
-            while abs(new_calc - last_calc) >= epsilon:  # testing convergence
+            new_calc = 1 # arbitrary initial guess
+            last_calc = 0 # arbitrary arbitrary starting point for comparison
+
+            while abs(new_calc - last_calc) >= epsilon: # testing convergence
                 last_calc = new_calc
-                ksdelta[i] = ksdelta[i] + 0.000001  # change to make iteration go
-                fdelta[i] = 2 * ((0.4 / (np.log(np.divide((30 * delta), ksdelta[
-                    i])))) ** 2)  # from Maggie section; current friction factor for boundary layer
-                shields_aa[i] = ((1 / 2) * np.multiply(fdelta[i], (u_delta[i] ** 2))) / ((s - 1) * g * d50) + (
-                        (1 / 4) * np.multiply(f_w[i], (u_hat[i] ** 2)) / (
-                        (s - 1) * g * d50))  # time averaged absolute shields stress
-                rough[i] = d50 * (mu + 6 * (shields_aa[i] - 1))  # current-related bed roughness
+                
+                ksdelta[i] = ksdelta[i] + 0.000001 # change to make iteration go
+                # Equation 20 from VDA13
+                fdelta[i] = 2 * (0.4 / np.log(30 * delta / ksdelta[i]))**2 # from Maggie section; current friction factor for boundary layer
+                # Equation A.3 from VDA13
+                shields_aa[i] = 0.5 * np.multiply(fdelta[i], u_delta[i]**2) / ((s - 1) * g * d50) + 0.25 * np.multiply(f_w[i], u_hat[i]**2) / ((s - 1) * g * d50) # time averaged absolute shields stress
+                # Part of equation A.1 and A.2 from VDA13
+                rough[i] = d50 * (mu + 6 * (shields_aa[i] - 1)) # current-related bed roughness
+                # Equation A.1 from VDA13
                 if lambda_[i] == 0:
                     ksw[i] = max(d50, rough[i])
                 else:
-                    ksw[i] = max(d50, rough[i]) + ((0.4 * eta[i] ** 2) / lambda_[i])  # Wave-related bed roughness
-                if np.divide(a_hat[i],
-                             ksw[
-                                 i]) > 1.587:  # Swart Equation, which goes into the time-averaged absolute Shields stress
-                    f_w[i] = 0.00251 * np.exp(5.21 * ((np.divide(a_hat[i], ksw[i])) ** (
-                        -0.19)))  # equation A.4; the Swart Equation. In the absence of acceleration skewness f_wc/f_wt below reduce to this
+                    ksw[i] = max(d50, rough[i]) + (0.4 * eta[i]**2) / lambda_[i] # Wave-related bed roughness
+                    
+                # Equation A.4 from VDA13
+                if np.divide(a_hat[i],ksw[i]) > 1.587: # Swart Equation, which goes into the time-averaged absolute Shields stress
+                    f_w[i] = 0.00251*np.exp(5.21*((np.divide(a_hat[i],ksw[i]))**(-0.19))) # equation A.4; the Swart Equation. In the absence of acceleration skewness f_wc/f_wt below reduce to this
                 else:
                     f_w[i] = 0.3
+                # Equation A.2 from VDA13
                 if lambda_[i] == 0:
                     ksdelta[i] = max((3 * d90), rough[i])
                 else:
-                    ksdelta[i] = max((3 * d90), rough[i]) + np.divide((0.4 * eta[i] * 2),
-                                                                      lambda_[i])  # also current-related bed roughness
+                    ksdelta[i] = max((3 * d90), rough[i]) + (0.4 * eta[i]**2) / lambda_[i] # also current-related bed roughness
                 new_calc = ksdelta[i]
-
-        f_wc = np.ones(np.shape(psimax))  # preallocating empty array
+            
+    
+        f_wc = np.ones(np.shape(psimax)) # preallocating empty array
         f_wt = np.ones(np.shape(psimax))
-
-        # Wave friction factor, separated out into crest and trough half cycles to account for acceleration skewness
-
+    
+            # Wave friction factor, separated out into crest and trough half cycles to account for acceleration skewness
+            
+        # Equation 21 from VDA13
         for i in range(0, len(psimax)):
-            if a_hat[i] / ksw[i] > 1.587:
-                f_wc[i] = 0.00251 * np.exp(5.21 * ((((2 * T_cu[i] / T_c[i]) ** c1) * a_hat[i]) / ksw[i]) ** (-0.19))
-                f_wt[i] = 0.00251 * np.exp(5.21 * ((((2 * T_tu[i] / T_t[i]) ** c1) * a_hat[i]) / ksw[i]) ** (-0.19))
+            if a_hat[i]/ksw[i] > 1.587:
+                f_wc[i] = 0.00251*np.exp(5.21 * (a_hat[i]*(2*T_cu[i] / T_c[i])**c1/ksw[i])**(-0.19))
+                f_wt[i] = 0.00251*np.exp(5.21 * (a_hat[i]*(2*T_tu[i] / T_t[i])**c1/ksw[i])**(-0.19))
             else:
                 f_wc[i] = 0.3
                 f_wt[i] = 0.3
@@ -241,7 +266,11 @@ class modelfunctions:
         theta_hat_t : np.array
             Shields parameter - trough
         """
-        s = rho_s / rho
+        
+        # calculate s parameter from VDA13
+        s = (rho_s - rho) / rho
+        
+        # Equation C.2 from VDA13
         theta_hat_c = (0.5 * fwdelt_c * u_hat_c ** 2) / ((s - 1) * g * d50)
         theta_hat_t = (0.5 * fwdelt_t * u_hat_t ** 2) / ((s - 1) * g * d50)
         return theta_hat_c, theta_hat_t
@@ -262,15 +291,14 @@ class modelfunctions:
 
         d50 = d50 * 1000  # conversion from m to mm for calculation
 
+        # Equation C.1 from VDA13
         sfl = []
         if d50 <= 0.15:
             sfl.append(25 * shield)
         elif 0.15 < d50 < 0.20:
             sfl.append(25 - (12 * (d50 - 0.15)) / (0.20 - 0.15))
-        elif d50 >= 0.20:
-            sfl.append(13 * shield)
         else:
-            sfl.append(np.nan)
+            sfl.append(13 * shield)
 
         return np.array(sfl).flatten() * (d50 / 1000)  # conversion back to m
 
@@ -322,16 +350,12 @@ class modelfunctions:
 
         # Phase lag parameters for the crest half cycle (P_c) and trough half cycle (P_t)
         if eta > 0:  # Ripple regime
-            P_c = alpha * (1 - xi * u_hat_c / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
-            P_t = alpha * (1 + xi * u_hat_t / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
-            # P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
-            # P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
+            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
 
         elif eta == 0:  # Sheet flow regime
-            P_c = alpha * (1 - xi * u_hat_c / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
-            P_t = alpha * (1 + xi * u_hat_t / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
-            # P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
-            # P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
+            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
 
         # Sand load entrainment during wave cycles
         if P_c <= 1:
