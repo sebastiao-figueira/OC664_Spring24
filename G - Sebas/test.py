@@ -49,7 +49,7 @@ fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.model
 # Carly output:
 dstar = vda.modelfunctions.dimensionless_grainsize(d=d50, rho_s=rho_s, rho=rho)
 shields_cr = vda.modelfunctions.critical_shields(dstar)
-omega_c, omega_t = vda.modelfunctions.sandload(theta_cx, theta_tx, shields_cr)
+omega_c, omega_t = vda.modelfunctions.sandload(theta_cmag, theta_tmag, shields_cr)
 
 # Carson output:
 shields_hat_c, shields_hat_t = vda.modelfunctions.shields_hat(fwdelt_c, fwdelt_t, u_hat_c, u_hat_t, rho_s, rho, d50)
