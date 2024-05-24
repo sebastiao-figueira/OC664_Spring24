@@ -2,7 +2,6 @@ import numpy as np
 import scipy
 import VDA_functions as vda
 
-
 # TEST MODEL HERE
 # %% general inputs
 
@@ -39,23 +38,29 @@ u_x = mat['u_x'][0]
 
 # Colin/Emily output:
 f_wc, f_wt, fdelta, f_w, eta = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
-                                                                              u_delta, delta, d50, d90, s, g)
+                                                                            u_delta, delta, d50, d90, s, g)
 # Maggie output:
-fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.modelfunctions.currentfric(u_delta, u_hat, f_wc, f_wt, rho, f_w,
-                                                                                   c_w, u_crx, u_trx, s, g, d50, fdelta)
+fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.modelfunctions.currentfric(u_delta, u_hat,
+                                                                                                      f_wc, f_wt, rho,
+                                                                                                      f_w,
+                                                                                                      c_w, u_crx, u_trx,
+                                                                                                      s, g, d50, fdelta)
 
 # Carly output:
-dstar = vda.modelfunctions.dimensionless_grainsize(d=d50, rho_s = rho_s, rho = rho)
+dstar = vda.modelfunctions.dimensionless_grainsize(d=d50, rho_s=rho_s, rho=rho)
 shields_cr = vda.modelfunctions.critical_shields(dstar)
 omega_c, omega_t = vda.modelfunctions.sandload(theta_cx, theta_tx, shields_cr)
 
 # Carson output:
-sheetflow_thickness_c = vda.modelfunctions.sfl_thickness(theta_cmag, d50)
-sheetflow_thickness_t = vda.modelfunctions.sfl_thickness(theta_tmag, d50)
+shields_hat_c, shields_hat_t = vda.modelfunctions.shields_hat(fwdelt_c, fwdelt_t, u_hat_c, u_hat_t, rho_s, rho, d50)
+sheetflow_thickness_c = vda.modelfunctions.sfl_thickness(shields_hat_c, d50)
+sheetflow_thickness_t = vda.modelfunctions.sfl_thickness(shields_hat_t, d50)
 
 # Luis output:
-omega_cc, omega_ct, omega_tt, omega_tc = vda.modelfunctions.phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, sheetflow_thickness_c, T_t, T_tu, sheetflow_thickness_t, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6)
-
+omega_cc, omega_ct, omega_tt, omega_tc = vda.modelfunctions.phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c,
+                                                                     T_cu, sheetflow_thickness_c, T_t, T_tu,
+                                                                     sheetflow_thickness_t, omega_c, omega_t, alpha=8.2,
+                                                                     xi=1.7, g=9.81, nu=2e-6)
 
 # Sebas output
 omega = [omega_cc, omega_ct, omega_tt, omega_tc]
@@ -63,4 +68,3 @@ wave_period = [T, T_c, T_cu, T_t, T_tu]
 shields = [theta_cmag, theta_tmag, theta_cx, theta_tx]
 
 q_s, q_sum = vda.modelfunctions.sediment_transport(omega, wave_period, shields, rho, rho_s, d50, g)
-

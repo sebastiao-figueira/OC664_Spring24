@@ -214,6 +214,39 @@ class modelfunctions:
 
     # %% Carson's function
     @staticmethod
+    def shields_hat(fwdelt_c, fwdelt_t, u_hat_c, u_hat_t, rho_s=2065, rho=1025, d50=0.0002, g=9.81):
+        """Calculates Shields parameter based on crest/trough velocity amplitude.
+        Parameters
+        ----------
+        fwdelt_c
+            Wave-current friction factor - crest
+        fwdelt_t
+            Wave-current friction factor - trough
+        u_hat_c
+            Crest velocity amplitude
+        u_hat_t
+            Trough velocity amplitude
+        rho_s
+            Sediment density (default 2650)
+        rho
+            Water density (default 1025)
+        g
+            Acceleration due to gravity (default 9.81)
+        d50
+            Median grain size (default 0.0002 m)
+        Returns
+        -------
+        theta_hat_c : np.array
+            Shields parameter - crest
+        theta_hat_t : np.array
+            Shields parameter - trough
+        """
+        s = rho_s / rho
+        theta_hat_c = (0.5 * fwdelt_c * u_hat_c ** 2) / ((s - 1) * g * d50)
+        theta_hat_t = (0.5 * fwdelt_t * u_hat_t ** 2) / ((s - 1) * g * d50)
+        return theta_hat_c, theta_hat_t
+
+    @staticmethod
     def sfl_thickness(shield, d50):
         '''
         function for Sheet Flow Layer Thickness
@@ -240,10 +273,11 @@ class modelfunctions:
             sfl.append(np.nan)
 
         return np.array(sfl).flatten() * (d50 / 1000)  # conversion back to m
-    
+
     # %% Luis' function
     @staticmethod
-    def phaseLagSingle(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
+    def phaseLagSingle(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c,
+                       omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
         '''
         Inputs:
         s           -> specific gravity of the sediment (considering quartz)
@@ -274,24 +308,24 @@ class modelfunctions:
 
         # Calculate specific gravity
         s = rho_s / rho
-        
+
         # Non-dimensional grain size
-        D_star = ((g * (s - 1) / (nu**2))**(1 / 3)) * d50
+        D_star = ((g * (s - 1) / (nu ** 2)) ** (1 / 3)) * d50
 
         # Settling velocity [m/s] (following van Rijn (1984))
-        if D_star**3 <= 16.187:
-            w_s = nu * (D_star**3) / (18 * d50)
-        elif 16.187 < D_star**3 <= 16187:
-            w_s = (10 * nu / d50) * (np.sqrt(1 + 0.01 * (D_star**3)) - 1)
-        elif D_star**3 > 16187:
-            w_s = 1.1 * nu * (D_star**1.5) / d50
+        if D_star ** 3 <= 16.187:
+            w_s = nu * (D_star ** 3) / (18 * d50)
+        elif 16.187 < D_star ** 3 <= 16187:
+            w_s = (10 * nu / d50) * (np.sqrt(1 + 0.01 * (D_star ** 3)) - 1)
+        elif D_star ** 3 > 16187:
+            w_s = 1.1 * nu * (D_star ** 1.5) / d50
 
         # Phase lag parameters for the crest half cycle (P_c) and trough half cycle (P_t)
-        if eta > 0:    # Ripple regime
+        if eta > 0:  # Ripple regime
             P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
             P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
-            
-        elif eta == 0: # Sheet flow regime
+
+        elif eta == 0:  # Sheet flow regime
             P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
             P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
 
@@ -311,34 +345,46 @@ class modelfunctions:
             omega_tc = (1 - 1 / P_t) * omega_t
 
         return omega_cc, omega_ct, omega_tt, omega_tc
-    
+
     @staticmethod
-    def phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
+    def phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c,
+                 omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6):
         '''
         Same as phaseLag above but works with vectors!
         '''
-    
+
         omega_cc = []
         omega_ct = []
         omega_tt = []
         omega_tc = []
-        
-        
+
         for i in range(len(eta)):
-            omega_cc_temp, omega_ct_temp, omega_tt_temp, omega_tc_temp = modelfunctions.phaseLagSingle(rho, rho_s, d50, eta[i], u_hat_c[i], u_hat_t[i], c_w[i], T_c[i], T_cu[i], delta_sc[i], T_t[i], T_tu[i], delta_st[i], omega_c[i], omega_t[i], alpha=8.2, xi=1.7)
-        
+            omega_cc_temp, omega_ct_temp, omega_tt_temp, omega_tc_temp = modelfunctions.phaseLagSingle(rho, rho_s, d50,
+                                                                                                       eta[i],
+                                                                                                       u_hat_c[i],
+                                                                                                       u_hat_t[i],
+                                                                                                       c_w[i], T_c[i],
+                                                                                                       T_cu[i],
+                                                                                                       delta_sc[i],
+                                                                                                       T_t[i], T_tu[i],
+                                                                                                       delta_st[i],
+                                                                                                       omega_c[i],
+                                                                                                       omega_t[i],
+                                                                                                       alpha=8.2,
+                                                                                                       xi=1.7)
+
             omega_cc.append(omega_cc_temp)
             omega_ct.append(omega_ct_temp)
             omega_tt.append(omega_tt_temp)
             omega_tc.append(omega_tc_temp)
-        
+
         omega_cc = np.array(omega_cc)
         omega_ct = np.array(omega_ct)
         omega_tt = np.array(omega_tt)
         omega_tc = np.array(omega_tc)
-        
+
         return omega_cc, omega_ct, omega_tt, omega_tc
-    
+
     @staticmethod
     def sediment_transport(omega, wave_period, shields, rho=1000, rho_s=2650, d_50=0.0002, g=9.81):
         """
@@ -357,28 +403,27 @@ class modelfunctions:
         Returns:
             float: Net sediment transport rate.
         """
-        
+
         # Check input array sizes
         if len(omega) != 4 or len(wave_period) != 5 or len(shields) != 4:
             raise ValueError("Input arrays must have sizes [4], [5], and [4] respectively.")
-    
-        
+
         # Calculate s parameter
-        s = (rho_s - rho) / rho 
-        
+        s = (rho_s - rho) / rho
+
         # Extract values from input arrays
         omega_cc, omega_ct, omega_tt, omega_tc = omega
         T, T_c, T_cu, T_t, T_tu = wave_period
         shields_c, shields_t, shields_cx, shields_tx = shields
-        
+
         # Calculate transport rates
         q_c = np.sqrt(shields_c) * T_c * (omega_cc + T_c / (2 * T_cu) * omega_tc) * shields_cx / shields_c
         q_t = np.sqrt(shields_t) * T_t * (omega_tt + T_t / (2 * T_tu) * omega_ct) * shields_tx / shields_t
-        
+
         # Calculate net sediment transport rate
         q_s = (q_c + q_t) * np.sqrt((s - 1) * g * d_50 ** 3) / T
-        
+
         # Sum sediment transport over selected time period
         q_sum = sum(q_s)
-        
+
         return q_s, q_sum
