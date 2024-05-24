@@ -163,7 +163,7 @@ class modelfunctions:
             Critical Shields number
         """
 
-        theta_cr = 0.30 / (1 + 1.2 * d_star) + 0.055 * (1 - np.exp(-0.020) * d_star)
+        theta_cr = 0.30 / (1 + 1.2 * d_star) + 0.055 * (1 - np.exp(-0.020 * d_star))
         return theta_cr
 
     # Calculate sand load for half-cycles: omega_c or omega_t
