@@ -322,12 +322,16 @@ class modelfunctions:
 
         # Phase lag parameters for the crest half cycle (P_c) and trough half cycle (P_t)
         if eta > 0:  # Ripple regime
-            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
-            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
+            P_c = alpha * (1 - xi * u_hat_c / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * (1 + xi * u_hat_t / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
+            # P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
+            # P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
 
         elif eta == 0:  # Sheet flow regime
-            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
-            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
+            P_c = alpha * (1 - xi * u_hat_c / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * (1 + xi * u_hat_t / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
+            # P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
+            # P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
 
         # Sand load entrainment during wave cycles
         if P_c <= 1:
