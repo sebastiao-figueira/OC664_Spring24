@@ -12,12 +12,12 @@ clc
 data = load("dataset_19971022_0700EST.mat");
 
 % establish data for gauge 1
-u = data.u(:, 1); % cross-shore velocity (m/s, 2Hz) 
-p = data.p(:,1); % water surface elevation (m, 2Hz) relative to zp
-x = data.x(:,1); % cross-shore position of sensor
-y = data.y(:,1); % alongshore position of sensor
-zu = data.zu(:,1); % vertical position for u-sensor
-zp = data.zp(:,1); % vertical position for p-sensor
+u    = data.u(:, 1); % cross-shore velocity (m/s, 2Hz) 
+p    = data.p(:,1); % water surface elevation (m, 2Hz) relative to zp
+x    = data.x(:,1); % cross-shore position of sensor
+y    = data.y(:,1); % alongshore position of sensor
+zu   = data.zu(:,1); % vertical position for u-sensor
+zp   = data.zp(:,1); % vertical position for p-sensor
 zbed = data.zbed(:,1); % vertical position of seabed (from sonar altimeter)
 
 % create time array for 21504 points at 2Hz. 2Hz = .5s time step
@@ -87,7 +87,7 @@ end
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 zero_downcrossings_indices = find(u_with_t(1:end - 1, 1) > 0 & u_with_t(2:end, 1) <= 0);
-zero_downcrossings = t(zero_downcrossings_indices);
+zero_downcrossings         = t(zero_downcrossings_indices);
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
@@ -160,7 +160,7 @@ end
 % all_waves 5th column is time at negative maxima
 
 figure();
-plot(all_waves{1, 14}(:, 2), all_waves{1, 14}(:, 1), 'linewidth', 2)
+plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1), 'linewidth', 2)
 xlabel('t [s]');
 ylabel('u [m/s]');
 title('Example of Intra-Wave for Gauge 1')
@@ -168,15 +168,13 @@ grid on
 ax = gca;
 ax.FontSize = 20;
 
-keyboard
-
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 % parameterize T, T_c, T_t, T_cu, T_tu for each intra-wave
 for i = 1:numel(all_waves)
-    T(1, i) = all_waves{1, i}(end, 2) - all_waves{1, i}(1, 2);
-    T_c(1, i) = all_waves{1, i}(1, 3) - all_waves{1, i}(1, 2);
-    T_t(1, i) = all_waves{1, i}(end, 2) - all_waves{1, i}(1, 3);
+    T(1, i)    = all_waves{1, i}(end, 2) - all_waves{1, i}(1, 2);
+    T_c(1, i)  = all_waves{1, i}(1, 3) - all_waves{1, i}(1, 2);
+    T_t(1, i)  = all_waves{1, i}(end, 2) - all_waves{1, i}(1, 3);
     T_cu(1, i) = all_waves{1, i}(1, 4) - all_waves{1, i}(1, 2);
     T_tu(1, i) = all_waves{1, i}(1, 5) - all_waves{1, i}(1, 3);
 end
@@ -185,7 +183,7 @@ end
 
 % eqn (4): u_x = u_w + abs(u_delta) * cos(phi);
 
-phi = 0; % obliquely incident current making angle with wave direction
+% phi = 0; % obliquely incident current making angle with wave direction
 % for this project, we are only focusing on x-direction, so phi = 0.
 
 % iterate to get time varying free-stream orbital velocity subscript, "w"
@@ -203,9 +201,9 @@ end
 
 % calculate u_x, time varying orbital velocity in x-direction
 for i = 1:numel(all_waves)
-    u_x{1, i} = u_w{1, i} + abs(u_delta(1, i));
+    u_x{1, i} = u_w{1, i} + u_delta(1, i);
+%     u_x{1, i} = u_w{1, i} + abs(u_delta(1, i));
 end
-
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
@@ -229,22 +227,19 @@ end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-% eqn (8a)
-
 % iterate to calculate u_hat_c for each wave
 
 for i = 1:numel(all_waves)
-    u_hat_c(1, i) = max(detrend(u_w{1,i}, 'constant'));
+    u_hat_c(1, i) = max(u_w{1,i});
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
-% eqn (8b)
-
 % iterate to calculate u_hat_t for each wave
 
 for i = 1:numel(all_waves)
-    u_hat_t(1, i) = min(detrend(u_w{1,i}, 'constant'));
+%     u_hat_t(1, i) = min(u_w{1,i});
+    u_hat_t(1, i) = u_delta(1,i) - min(u_x{1,i});
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -286,7 +281,8 @@ end
 
 % iterate to calculate u_crx and u_cry
 for i = 1:numel(all_waves)
-    u_crx(1, i) = u_tilda_cr(1, i) + abs(u_delta(1, i));
+    u_crx(1, i) = u_tilda_cr(1, i) + u_delta(1, i);
+%     u_crx(1, i) = u_tilda_cr(1, i) + abs(u_delta(1, i));
     % u_cry(1, i) = abs(u_delta(1, i) * cos(phi));
 end
 
@@ -300,7 +296,8 @@ end
 % iterate to calculate u_trx and u_try
 
 for i = 1:numel(all_waves)
-    u_trx(1, i) = -u_tilda_tr(1, i) + abs(u_delta(1, i));
+    u_trx(1, i) = -u_tilda_tr(1, i) + u_delta(1, i);
+%     u_trx(1, i) = -u_tilda_tr(1, i) + abs(u_delta(1, i));
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %

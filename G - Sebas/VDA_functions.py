@@ -87,7 +87,7 @@ class modelfunctions:
                 shields_aa[i] = 0.5 * np.multiply(fdelta[i], u_delta[i]**2) / ((s - 1) * g * d50) + 0.25 * np.multiply(f_w[i], u_hat[i]**2) / ((s - 1) * g * d50) # time averaged absolute shields stress
                 # Part of equation A.1 and A.2 from VDA13
                 rough[i] = d50 * (mu + 6 * (shields_aa[i] - 1)) # current-related bed roughness
-                # Equation A.1 from VDA13
+                # Equation A.5 from VDA13
                 if lambda_[i] == 0:
                     ksw[i] = max(d50, rough[i])
                 else:
@@ -98,7 +98,7 @@ class modelfunctions:
                     f_w[i] = 0.00251*np.exp(5.21*((np.divide(a_hat[i],ksw[i]))**(-0.19))) # equation A.4; the Swart Equation. In the absence of acceleration skewness f_wc/f_wt below reduce to this
                 else:
                     f_w[i] = 0.3
-                # Equation A.2 from VDA13
+                # Equation A.1 from VDA13
                 if lambda_[i] == 0:
                     ksdelta[i] = max((3 * d90), rough[i])
                 else:
@@ -120,28 +120,32 @@ class modelfunctions:
                 f_wc[i] = 0.3
                 f_wt[i] = 0.3
 
-        return f_wc, f_wt, fdelta, f_w, eta
+        return f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw
 
     # %% Maggie's function
     @staticmethod
     def currentfric(u_delta, uhat, fw_c, fw_t, rho, fw_swart, cw, uc_r, ut_r, s, g, d50, fdelta):
         #assumed wave boundary layer thickness (see section 6 VDA13)
+        
         #compare current vs wave orbital velocity(eqn 19)
-        alpha = np.divide(np.abs(u_delta), (np.abs(u_delta) + uhat))  #[-]
+        alpha = np.abs(u_delta)/(np.abs(u_delta) + uhat)  #[-]
+        
         #wave-current friction factor at crest (fwdelt_c) and trough (fwdelt_t) (eqn 18)
-        fwdelt_c = np.multiply(alpha, fdelta) + np.multiply((1 - alpha), fw_c)  #[-]
-        fwdelt_t = np.multiply(alpha, fdelta) + np.multiply((1 - alpha), fw_t)  #[-]
+        fwdelt_c = alpha * fdelta + (1 - alpha) * fw_c  #[-]
+        fwdelt_t = alpha * fdelta + (1 - alpha) * fw_t  #[-]
+        
         #wave Reynolds stress TwRe (eqn 22)
         alpha_w = 0.424  #dimensionless scale factor
-        fw_Delt = np.multiply(alpha, fdelta) + np.multiply((1 - alpha),
-                                                           fw_swart)  #[-] full-cycle wave-current friction factor
-        TwRe = np.multiply(np.divide((rho * fw_Delt), (2 * cw)), (alpha_w * uhat ** 3))
+        fw_Delt = alpha * fdelta + (1 - alpha) * fw_swart  #[-] full-cycle wave-current friction factor
+        TwRe    = rho * fw_Delt * alpha_w * ((uhat)**3)/(2*cw)
+        
         #Shields magnitude at crest (theta_cmag) and trough (theta_tmag) (eqn 17)
-        theta_cmag = np.divide(np.multiply((0.5 * fwdelt_c), ((np.abs(uc_r)) ** 2)), ((s - 1) * g * d50))
-        theta_tmag = np.divide(np.multiply((0.5 * fwdelt_t), ((np.abs(ut_r)) ** 2)), ((s - 1) * g * d50))
+        theta_cmag = 0.5 * fwdelt_c * ((np.abs(uc_r)) ** 2) / ((s - 1) * g * d50)
+        theta_tmag = 0.5 * fwdelt_t * ((np.abs(ut_r)) ** 2) / ((s - 1) * g * d50)
+        
         #Bed shear stress (Shields vector) at crest (theta_cx) and trough (theta_tx) (eqn 15)
-        theta_cx = np.multiply(theta_cmag, np.divide(uc_r, np.abs(uc_r))) + np.divide(TwRe, ((s - 1) * g * d50))
-        theta_tx = np.multiply(theta_tmag, np.divide(ut_r, np.abs(ut_r))) + np.divide(TwRe, ((s - 1) * g * d50))
+        theta_cx = theta_cmag * uc_r / np.abs(uc_r) + TwRe / ((s - 1) * g * d50)
+        theta_tx = theta_tmag * ut_r / np.abs(ut_r) + TwRe / ((s - 1) * g * d50)
 
         return fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx
 
