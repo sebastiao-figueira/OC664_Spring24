@@ -12,7 +12,6 @@ clc
 data = load("dataset_19971022_0700EST.mat");
 
 % establish data for gauge 1
-u = data.u(:, 1); % cross-shore velocity (m/s, 2Hz) 
 p = data.p(:,1); % water surface elevation (m, 2Hz) relative to zp
 x = data.x(:,1); % cross-shore position of sensor
 y = data.y(:,1); % alongshore position of sensor
@@ -20,47 +19,215 @@ zu = data.zu(:,1); % vertical position for u-sensor
 zp = data.zp(:,1); % vertical position for p-sensor
 zbed = data.zbed(:,1); % vertical position of seabed (from sonar altimeter)
 
-% create time array for 21504 points at 2Hz. 2Hz = .5s time step
-t = (0:.5:21504 / 2 - .5)'; % time in s
+u = [
+-0.242259
+-0.134112
+-0.0181004
+0.103613
+0.228319
+0.352905
+0.474073
+0.58859
+0.69355
+0.786594
+0.866061
+0.931035
+0.981328
+1.01737
+1.04007
+1.05068
+1.05062
+1.0414
+1.02448
+1.00124
+0.972919
+0.940625
+0.905304
+0.867756
+0.828648
+0.788526
+0.747833
+0.706921
+0.666069
+0.625491
+0.585351
+0.545772
+0.50684
+0.468617
+0.431142
+0.394434
+0.358503
+0.323346
+0.288951
+0.255302
+0.222376
+0.19015
+0.158595
+0.127684
+0.0973852
+0.0676702
+0.0385086
+0.00987062
+-0.0182728
+-0.0459501
+-0.0731886
+-0.100015
+-0.126454
+-0.15253
+-0.178266
+-0.203683
+-0.228802
+-0.25364
+-0.278214
+-0.302539
+-0.326629
+-0.350493
+-0.374141
+-0.397579
+-0.42081
+-0.443833
+-0.466646
+-0.489241
+-0.511604
+-0.533719
+-0.555561
+-0.577099
+-0.598294
+-0.619096
+-0.639444
+-0.659265
+-0.67847
+-0.696953
+-0.714586
+-0.731216
+-0.746666
+-0.760723
+-0.773138
+-0.78362
+-0.791829
+-0.797371
+-0.799791
+-0.79857
+-0.793118
+-0.782772
+-0.766801
+-0.744411
+-0.71476
+-0.676984
+-0.630241
+-0.573761
+-0.506922
+-0.429344
+-0.340987
+-0.242259];
 
-% convert time array to a time_serial for purposes of plotting only
-% dur = duration(2, 59, 12, 'Format', 'hh:mm');
-dur = seconds(t);
-time_serial = datenum(dur);
-
-fig = figure(1);
-plot(time_serial, u)
-xlabel('t [hh:mm]');
-ylabel('u [m/s]');
-title('Measured Near-Bed Velocities at Gauge 1 (Closest to Shore)')
-datetick('x', 'HH:MM', 'keeplimits');
-xlim([0 .1250]);
-hold on
-reference_line = plot(get(gca, 'XLim'), [0 0], 'r-', 'LineWidth', 1.5);
-legend('u', 'Reference Line (y = 0)', 'Location', 'northeast');
-hold off;
-% print(fig, 'PicName', '-dpng');
-ax = gca;
-ax.FontSize = 20;
+t = [
+0
+0.130536
+0.261072
+0.391608
+0.522145
+0.652681
+0.783217
+0.913753
+1.04429
+1.17483
+1.30536
+1.4359
+1.56643
+1.69697
+1.82751
+1.95804
+2.08858
+2.21911
+2.34965
+2.48019
+2.61072
+2.74126
+2.87179
+3.00233
+3.13287
+3.2634
+3.39394
+3.52448
+3.65501
+3.78555
+3.91608
+4.04662
+4.17716
+4.30769
+4.43823
+4.56876
+4.6993
+4.82984
+4.96037
+5.09091
+5.22145
+5.35198
+5.48252
+5.61305
+5.74359
+5.87413
+6.00466
+6.1352
+6.26573
+6.39627
+6.52681
+6.65734
+6.78788
+6.91841
+7.04895
+7.17949
+7.31002
+7.44056
+7.5711
+7.70163
+7.83217
+7.9627
+8.09324
+8.22378
+8.35431
+8.48485
+8.61538
+8.74592
+8.87646
+9.00699
+9.13753
+9.26807
+9.3986
+9.52914
+9.65967
+9.79021
+9.92075
+10.0513
+10.1818
+10.3124
+10.4429
+10.5734
+10.704
+10.8345
+10.965
+11.0956
+11.2261
+11.3566
+11.4872
+11.6177
+11.7483
+11.8788
+12.0093
+12.1399
+12.2704
+12.4009
+12.5315
+12.662
+12.7925
+12.9231];
 
 fig = figure();
-plot(u); hold on 
+plot(t, u); hold on 
 yline(0)
-xlim([0,30])
 
-% interpolating u and t
-tq = t(1):0.05:t(end);
-tq = tq';
-uq = interp1(t,u,tq);
-
-u = uq;
-t = tq;
-
-fig = figure();
-plot(u); hold on 
-yline(0)
-xlim([0,300])
-grid()
+keyboard
 
 % concatenate "u" and "t" to associate time data with velocity data
 u_with_t = [u, t];
@@ -159,8 +326,10 @@ end
 % all_waves 4th column is time at positive maxima
 % all_waves 5th column is time at negative maxima
 
+keyboard
+
 figure();
-plot(all_waves{1, 14}(:, 2), all_waves{1, 14}(:, 1), 'linewidth', 2)
+plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1), 'linewidth', 2)
 xlabel('t [s]');
 ylabel('u [m/s]');
 title('Example of Intra-Wave for Gauge 1')
@@ -168,14 +337,12 @@ grid on
 ax = gca;
 ax.FontSize = 20;
 
-keyboard
-
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 % parameterize T, T_c, T_t, T_cu, T_tu for each intra-wave
 for i = 1:numel(all_waves)
-    T(1, i) = all_waves{1, i}(end, 2) - all_waves{1, i}(1, 2);
-    T_c(1, i) = all_waves{1, i}(1, 3) - all_waves{1, i}(1, 2);
+    T = t(end);
+    T = all_waves{1, i}(1, 3) - all_waves{1, i}(1, 2);
     T_t(1, i) = all_waves{1, i}(end, 2) - all_waves{1, i}(1, 3);
     T_cu(1, i) = all_waves{1, i}(1, 4) - all_waves{1, i}(1, 2);
     T_tu(1, i) = all_waves{1, i}(1, 5) - all_waves{1, i}(1, 3);
@@ -222,6 +389,8 @@ end
 % eqn (8): u_hat = sqrt((2 / T) * trapz((u_w) ^ 2));
 
 % iterate to calculate u_hat for each wave
+
+keyboard
 
 for i = 1:numel(all_waves)
     u_hat(1, i) = sqrt((2 ./ T(1, i) .* trapz(linspace(0, T(1, i), numel(u_w{1, i})), u_w{1, i} .^ 2)));

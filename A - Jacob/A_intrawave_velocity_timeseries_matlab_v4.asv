@@ -160,15 +160,13 @@ end
 % all_waves 5th column is time at negative maxima
 
 figure();
-plot(all_waves{1, 14}(:, 2), all_waves{1, 14}(:, 1), 'linewidth', 2)
+plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1), 'linewidth', 2)
 xlabel('t [s]');
 ylabel('u [m/s]');
 title('Example of Intra-Wave for Gauge 1')
 grid on
 ax = gca;
 ax.FontSize = 20;
-
-keyboard
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
@@ -222,6 +220,8 @@ end
 % eqn (8): u_hat = sqrt((2 / T) * trapz((u_w) ^ 2));
 
 % iterate to calculate u_hat for each wave
+
+keyboard
 
 for i = 1:numel(all_waves)
     u_hat(1, i) = sqrt((2 ./ T(1, i) .* trapz(linspace(0, T(1, i), numel(u_w{1, i})), u_w{1, i} .^ 2)));
