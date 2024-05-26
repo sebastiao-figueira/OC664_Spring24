@@ -90,14 +90,18 @@ class modelfunctions:
                 # Equation A.5 from VDA13
                 if lambda_[i] == 0:
                     ksw[i] = max(d50, rough[i])
+                    # ksw[i] = 2.5*d50
                 else:
                     ksw[i] = max(d50, rough[i]) + (0.4 * eta[i]**2) / lambda_[i] # Wave-related bed roughness
+                    # ksw[i] = 2.5*d50
                     
                 # Equation A.4 from VDA13
                 if np.divide(a_hat[i],ksw[i]) > 1.587: # Swart Equation, which goes into the time-averaged absolute Shields stress
                     f_w[i] = 0.00251*np.exp(5.21*((np.divide(a_hat[i],ksw[i]))**(-0.19))) # equation A.4; the Swart Equation. In the absence of acceleration skewness f_wc/f_wt below reduce to this
+                    # f_w[i] = 0.007
                 else:
                     f_w[i] = 0.3
+                    # f_w[i] = 0.007
                 # Equation A.1 from VDA13
                 if lambda_[i] == 0:
                     ksdelta[i] = max((3 * d90), rough[i])
@@ -120,7 +124,7 @@ class modelfunctions:
                 f_wc[i] = 0.3
                 f_wt[i] = 0.3
 
-        return f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw
+        return f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw, lambda_
 
     # %% Maggie's function
     @staticmethod
@@ -272,7 +276,8 @@ class modelfunctions:
         """
         
         # calculate s parameter from VDA13
-        s = (rho_s - rho) / rho
+        s = rho_s/rho
+        # s = (rho_s - rho) / rho
         
         # Equation C.2 from VDA13
         theta_hat_c = (0.5 * fwdelt_c * u_hat_c ** 2) / ((s - 1) * g * d50)
@@ -300,7 +305,7 @@ class modelfunctions:
         if d50 <= 0.15:
             sfl.append(25 * shield)
         elif 0.15 < d50 < 0.20:
-            sfl.append(25 - (12 * (d50 - 0.15)) / (0.20 - 0.15))
+            sfl.append(25 - ((12 * (d50 - 0.15)) / (0.20 - 0.15)))
         else:
             sfl.append(13 * shield)
 
@@ -441,7 +446,8 @@ class modelfunctions:
             raise ValueError("Input arrays must have sizes [4], [5], and [4] respectively.")
 
         # Calculate s parameter
-        s = (rho_s - rho) / rho
+        s = rho_s/rho
+        # s = (rho_s - rho) / rho
 
         # Extract values from input arrays
         omega_cc, omega_ct, omega_tt, omega_tc = omega

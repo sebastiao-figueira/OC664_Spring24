@@ -11,7 +11,8 @@ d90   = 0.00025  # m; value taken from: "Uncertainty in Nearshore Sand Bar Migra
 g     = 9.81
 rho   = 1025
 rho_s = 2650
-s     = (rho_s - rho) / rho
+s     = rho_s/rho
+# s = (rho_s - rho) / rho
 
 # Load Jacob's output
 mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
@@ -35,7 +36,7 @@ u_w        = mat['u_w'][0]
 u_x        = mat['u_x'][0]
 
 # Colin/Emily output:
-f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
+f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw, lambda_ = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
                                                                             u_delta, delta, d50, d90, s, g)
 
 # Maggie output:
@@ -46,12 +47,12 @@ fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.model
                                                                                                       s, g, d50, fdelta)
 
 # Carly output:
-dstar            = vda.modelfunctions.dimensionless_grainsize(d=d50, rho_s=rho_s, rho=rho)
+dstar            = vda.modelfunctions.dimensionless_grainsize()
 shields_cr       = vda.modelfunctions.critical_shields(dstar)
 omega_c, omega_t = vda.modelfunctions.sandload(theta_cmag, theta_tmag, shields_cr)
 
 # Carson output:
-shields_hat_c, shields_hat_t = vda.modelfunctions.shields_hat(fwdelt_c, fwdelt_t, u_hat_c, u_hat_t, rho_s, rho, d50)
+shields_hat_c, shields_hat_t = vda.modelfunctions.shields_hat(fwdelt_c, fwdelt_t, u_hat_c, u_hat_t)
 sheetflow_thickness_c        = vda.modelfunctions.sfl_thickness(shields_hat_c, d50)
 sheetflow_thickness_t        = vda.modelfunctions.sfl_thickness(shields_hat_t, d50)
 
