@@ -6,8 +6,8 @@ import VDA_functions as vda
 # %% general inputs
 
 delta = 0.2  # m
-d50   = 0.0002  # mm; this was given in our midterm so we've followed the same assumptions
-d90   = 0.00025  # mm; value taken from: "Uncertainty in Nearshore Sand Bar Migration" which had d90 of 0.00024. We rounded up slightly given that our d50 is also larger than that paper's d50.
+d50   = 0.0002  # m; this was given in our midterm so we've followed the same assumptions
+d90   = 0.00025  # m; value taken from: "Uncertainty in Nearshore Sand Bar Migration" which had d90 of 0.00024. We rounded up slightly given that our d50 is also larger than that paper's d50.
 g     = 9.81
 rho   = 1025
 rho_s = 2650
@@ -37,6 +37,7 @@ u_x        = mat['u_x'][0]
 # Colin/Emily output:
 f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
                                                                             u_delta, delta, d50, d90, s, g)
+
 # Maggie output:
 fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx = vda.modelfunctions.currentfric(u_delta, u_hat,
                                                                                                       f_wc, f_wt, rho,

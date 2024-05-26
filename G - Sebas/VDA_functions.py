@@ -153,7 +153,7 @@ class modelfunctions:
     # D_star (Soulsby 1997)
     @staticmethod
     def dimensionless_grainsize(d: float = 0.0002, g: float = 9.81, rho_s: float = 2650.0,
-                                rho: float = 1000.0, nu: float = 2e-6):
+                                rho: float = 1025.0, nu: float = 2e-6):
         """Calculates dimensionless grain size, D*.
         Parameters
         ----------
@@ -164,7 +164,7 @@ class modelfunctions:
         rho_s : float
             Density of sediment (default is 2650.0)
         rho : float
-            Density of water (default is 1000.0)
+            Density of water (default is 1025.0)
         nu : float
             Kinematic viscosity of water (default is 2e-6)
 
