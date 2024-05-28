@@ -230,7 +230,7 @@ end
 % iterate to calculate u_hat_c for each wave
 
 for i = 1:numel(all_waves)
-    u_hat_c(1, i) = max(u_w{1,i});
+    u_hat_c(1, i) = max(u_x{1,i}) - u_delta(1, i);
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
