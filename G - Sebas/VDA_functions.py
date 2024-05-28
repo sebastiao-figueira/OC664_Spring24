@@ -151,7 +151,7 @@ class modelfunctions:
         theta_cx = theta_cmag * uc_r / np.abs(uc_r) + TwRe / ((s - 1) * g * d50)
         theta_tx = theta_tmag * ut_r / np.abs(ut_r) + TwRe / ((s - 1) * g * d50)
 
-        return fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx
+        return fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx, fw_Delt
 
     # %% Carly's functions
     # D_star (Soulsby 1997)
@@ -462,6 +462,6 @@ class modelfunctions:
         q_s = (q_c + q_t) * np.sqrt((s - 1) * g * d_50 ** 3) / T
 
         # Sum sediment transport over selected time period
-        q_sum = sum(q_s)
+        Q_sum = sum(q_s*T)
 
-        return q_s, q_sum
+        return q_s, Q_sum
