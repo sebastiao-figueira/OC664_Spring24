@@ -17,7 +17,7 @@ s     = rho_s/rho
 # s = (rho_s - rho) / rho
 
 # Load Jacob's output
-mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
+mat = scipy.io.loadmat('intrawave_outputs_offshore.mat')
 
 a_hat      = mat['a_hat'][0]
 c_w        = mat['c_w'][0]

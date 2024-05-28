@@ -53,12 +53,14 @@ class modelfunctions:
             
         for i in range(0, len(psimax)):
             eta[i] = meta * n[i] * a_hat[i] * (0.275 - 0.022 * psimax[i]**0.42)
+            # eta[i] = 0
     
         # Equation B.2 in VDA13
         lambda_ = np.ones(np.shape(psimax)) # preallocating empty array
     
         for i in range(0, len(psimax)): # Ripple length (lambda) equation
             lambda_[i] = mlambda * a_hat[i] * n[i] * (1.97 - 0.44 * psimax[i]**0.21)
+            # lambda_[i] = 0
             
         c1 = 2.6 # noted in VDA13, empirically derived        
     
@@ -90,10 +92,9 @@ class modelfunctions:
                 # Equation A.5 from VDA13
                 if lambda_[i] == 0:
                     ksw[i] = max(d50, rough[i])
-                    # ksw[i] = 2.5*d50
+        
                 else:
                     ksw[i] = max(d50, rough[i]) + (0.4 * eta[i]**2) / lambda_[i] # Wave-related bed roughness
-                    # ksw[i] = 2.5*d50
                     
                 # Equation A.4 from VDA13
                 if np.divide(a_hat[i],ksw[i]) > 1.587: # Swart Equation, which goes into the time-averaged absolute Shields stress
@@ -118,8 +119,8 @@ class modelfunctions:
         # Equation 21 from VDA13
         for i in range(0, len(psimax)):
             if a_hat[i]/ksw[i] > 1.587:
-                f_wc[i] = 0.00251*np.exp(5.21 * (a_hat[i]*(2*T_cu[i] / T_c[i])**c1/ksw[i])**(-0.19))
-                f_wt[i] = 0.00251*np.exp(5.21 * (a_hat[i]*(2*T_tu[i] / T_t[i])**c1/ksw[i])**(-0.19))
+                f_wc[i] = 0.00251*np.exp(5.21 * (a_hat[i]*((2*T_cu[i] / T_c[i])**c1)/ksw[i])**(-0.19))
+                f_wt[i] = 0.00251*np.exp(5.21 * (a_hat[i]*((2*T_tu[i] / T_t[i])**c1)/ksw[i])**(-0.19))
             else:
                 f_wc[i] = 0.3
                 f_wt[i] = 0.3
