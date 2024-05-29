@@ -322,8 +322,10 @@ for i = 1:numel(all_waves)
     c_w(1, i) = L(1, i) ./ T(1, i);
 end
 
+keyboard
+
 % create an output file of parameters needed for other parts of the project
-output_file = 'A_intrawave_velocity_timeseries_output_file.mat'; % file name
+output_file = 'intrawave_outputs_onshore.mat'; % file name
 
 % save the variables to a .mat file
 save(output_file, 'T', 'T_c', 'T_t', 'T_cu', 'T_tu', 'u_w', 'u_delta', 'u_x', ...

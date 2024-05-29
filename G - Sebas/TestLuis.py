@@ -1,11 +1,37 @@
+#%% PREPARING PYTHON ENVIRONMENT
+
+# Importing Python packages
+
 import numpy as np
 import scipy.io
 import VDA_functions as vda
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 
-# TEST MODEL HERE
-# %% general inputs
+# Font settings for figures
+font_label = {'family': 'serif',
+        'color':  'black',
+        'weight': 'normal',
+        'size': 24,
+        }
+
+font = {'family' : 'serif',
+'weight' : 'bold',
+'size' : 22}
+plt.rc('font', **font)
+
+SMALL_SIZE = 20
+MEDIUM_SIZE = 22
+BIGGER_SIZE = 24
+
+plt.rc('axes', titlesize=MEDIUM_SIZE)
+plt.rc('axes', labelsize=MEDIUM_SIZE)  
+plt.rc('xtick', labelsize=SMALL_SIZE)   
+plt.rc('ytick', labelsize=SMALL_SIZE)    
+plt.rc('legend', fontsize=SMALL_SIZE)   
+plt.rc('figure', titlesize=BIGGER_SIZE)
+
+#%% GENERAL INPUTS
 
 delta = 0.2  # m
 d50   = 0.0002  # m; this was given in our midterm so we've followed the same assumptions
@@ -14,7 +40,8 @@ g     = 9.81
 rho   = 1025
 rho_s = 2650
 s     = rho_s/rho
-# s = (rho_s - rho) / rho
+
+#%% LOADING DATA
 
 # Load Jacob's output
 mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
@@ -36,6 +63,8 @@ u_tilda_tr = mat['u_tilda_tr'][0]
 u_trx      = mat['u_trx'][0]
 u_w        = mat['u_w'][0]
 u_x        = mat['u_x'][0]
+
+#%% APPLYING REST OF VDA13 EQS
 
 # Colin/Emily output:
 f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw, lambda_ = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
@@ -70,6 +99,22 @@ wave_period = [T, T_c, T_cu, T_t, T_tu]
 shields     = [theta_cmag, theta_tmag, theta_cx, theta_tx]
 
 q_s, Q_sum = vda.modelfunctions.sediment_transport(omega, wave_period, shields, rho, rho_s, d50, g)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # print("for calculated theta avg q_s = ", np.mean(q_s))
 
