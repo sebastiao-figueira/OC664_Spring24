@@ -36,7 +36,7 @@ class modelfunctions:
             mu = 6 - (5 * (d50_mm - 0.15)) / (0.2 - 0.15)
         else:
             mu = 1
-
+        
         # Equation B.5 in VDA13
         n = np.ones(np.shape(psimax)) # preallocating empty array
             
@@ -142,7 +142,7 @@ class modelfunctions:
         #wave Reynolds stress TwRe (eqn 22)
         alpha_w = 0.424  #dimensionless scale factor
         fw_Delt = alpha * fdelta + (1 - alpha) * fw_swart  #[-] full-cycle wave-current friction factor
-        TwRe    = rho * fw_Delt * alpha_w * ((uhat)**3)/(2*cw)
+        TwRe    = fw_Delt * alpha_w * ((uhat)**3)/(2*cw)
         
         #Shields magnitude at crest (theta_cmag) and trough (theta_tmag) (eqn 17)
         theta_cmag = 0.5 * fwdelt_c * ((np.abs(uc_r)) ** 2) / ((s - 1) * g * d50)
@@ -278,7 +278,6 @@ class modelfunctions:
         
         # calculate s parameter from VDA13
         s = rho_s/rho
-        # s = (rho_s - rho) / rho
         
         # Equation C.2 from VDA13
         theta_hat_c = (0.5 * fwdelt_c * u_hat_c ** 2) / ((s - 1) * g * d50)
@@ -360,13 +359,13 @@ class modelfunctions:
 
         # Phase lag parameters for the crest half cycle (P_c) and trough half cycle (P_t)
         if eta > 0:  # Ripple regime
-            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (eta / (2 * (T_c - T_cu) * w_s))
-            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (eta / (2 * (T_t - T_tu) * w_s))
+            P_c = alpha * (1 - (xi * u_hat_c / c_w)) * (eta / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * (1 + (xi * u_hat_t / c_w)) * (eta / (2 * (T_t - T_tu) * w_s))
 
         elif eta == 0:  # Sheet flow regime
-            P_c = alpha * ((1 - xi * u_hat_c) / c_w) * (delta_sc / (2 * (T_c - T_cu) * w_s))
-            P_t = alpha * ((1 + xi * u_hat_t) / c_w) * (delta_st / (2 * (T_t - T_tu) * w_s))
-
+            P_c = alpha * (1 - (xi * u_hat_c / c_w)) * (delta_sc / (2 * (T_c - T_cu) * w_s))
+            P_t = alpha * (1 + (xi * u_hat_t / c_w)) * (delta_st / (2 * (T_t - T_tu) * w_s))
+        
         # Sand load entrainment during wave cycles
         if P_c <= 1:
             omega_cc = omega_c
@@ -381,6 +380,9 @@ class modelfunctions:
         elif P_t > 1:
             omega_tt = omega_t / P_t
             omega_tc = (1 - 1 / P_t) * omega_t
+            
+        print(P_c)
+        print(P_t)
 
         return omega_cc, omega_ct, omega_tt, omega_tc
 
@@ -448,7 +450,6 @@ class modelfunctions:
 
         # Calculate s parameter
         s = rho_s/rho
-        # s = (rho_s - rho) / rho
 
         # Extract values from input arrays
         omega_cc, omega_ct, omega_tt, omega_tc = omega
@@ -463,6 +464,10 @@ class modelfunctions:
         q_s = (q_c + q_t) * np.sqrt((s - 1) * g * d_50 ** 3) / T
 
         # Sum sediment transport over selected time period
-        Q_sum = sum(q_s*T)
+        # Q_sum = sum(q_s)
+        # Q_sum = Q_sum/10800
+        
+        Q_sum = np.mean(q_s)
+        Q_sum = Q_sum * 86400
 
         return q_s, Q_sum

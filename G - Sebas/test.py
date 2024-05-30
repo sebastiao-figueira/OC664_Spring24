@@ -14,7 +14,6 @@ g     = 9.81
 rho   = 1025
 rho_s = 2650
 s     = rho_s/rho
-# s = (rho_s - rho) / rho
 
 # Load Jacob's output
 mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')

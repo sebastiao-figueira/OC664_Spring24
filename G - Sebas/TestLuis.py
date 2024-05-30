@@ -33,9 +33,9 @@ plt.rc('figure', titlesize=BIGGER_SIZE)
 
 #%% GENERAL INPUTS
 
-delta = 0.2  # m
+delta = 0.2     # m
 d50   = 0.0002  # m; this was given in our midterm so we've followed the same assumptions
-d90   = 0.00025  # m; value taken from: "Uncertainty in Nearshore Sand Bar Migration" which had d90 of 0.00024. We rounded up slightly given that our d50 is also larger than that paper's d50.
+d90   = 0.00025 # m; value taken from: "Uncertainty in Nearshore Sand Bar Migration" which had d90 of 0.00024. We rounded up slightly given that our d50 is also larger than that paper's d50.
 g     = 9.81
 rho   = 1025
 rho_s = 2650
@@ -46,23 +46,41 @@ s     = rho_s/rho
 # Load Jacob's output
 mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
 
-a_hat      = mat['a_hat'][0]
-c_w        = mat['c_w'][0]
-T          = mat['T'][0]
-T_c        = mat['T_c'][0]
-T_cu       = mat['T_cu'][0]
-T_t        = mat['T_t'][0]
-T_tu       = mat['T_tu'][0]
-u_crx      = mat['u_crx'][0]
-u_delta    = mat['u_delta'][0]
-u_hat      = mat['u_hat'][0]
-u_hat_c    = mat['u_hat_c'][0]
-u_hat_t    = mat['u_hat_t'][0]
-u_tilda_cr = mat['u_tilda_cr'][0]
-u_tilda_tr = mat['u_tilda_tr'][0]
-u_trx      = mat['u_trx'][0]
-u_w        = mat['u_w'][0]
-u_x        = mat['u_x'][0]
+a_hat      = mat['a_hat'][0][4:5]
+c_w        = mat['c_w'][0][4:5]
+T          = mat['T'][0][4:5]
+T_c        = mat['T_c'][0][4:5]
+T_cu       = mat['T_cu'][0][4:5]
+T_t        = mat['T_t'][0][4:5]
+T_tu       = mat['T_tu'][0][4:5]
+u_crx      = mat['u_crx'][0][4:5]
+u_delta    = mat['u_delta'][0][4:5]
+u_hat      = mat['u_hat'][0][4:5]
+u_hat_c    = mat['u_hat_c'][0][4:5]
+u_hat_t    = mat['u_hat_t'][0][4:5]
+u_tilda_cr = mat['u_tilda_cr'][0][4:5]
+u_tilda_tr = mat['u_tilda_tr'][0][4:5]
+u_trx      = mat['u_trx'][0][4:5]
+u_w        = mat['u_w'][0][4:5]
+u_x        = mat['u_x'][0][4:5]
+
+# a_hat      = mat['a_hat'][0]
+# c_w        = mat['c_w'][0]
+# T          = mat['T'][0]
+# T_c        = mat['T_c'][0]
+# T_cu       = mat['T_cu'][0]
+# T_t        = mat['T_t'][0]
+# T_tu       = mat['T_tu'][0]
+# u_crx      = mat['u_crx'][0]
+# u_delta    = mat['u_delta'][0]
+# u_hat      = mat['u_hat'][0]
+# u_hat_c    = mat['u_hat_c'][0]
+# u_hat_t    = mat['u_hat_t'][0]
+# u_tilda_cr = mat['u_tilda_cr'][0]
+# u_tilda_tr = mat['u_tilda_tr'][0]
+# u_trx      = mat['u_trx'][0]
+# u_w        = mat['u_w'][0]
+# u_x        = mat['u_x'][0]
 
 #%% APPLYING REST OF VDA13 EQS
 

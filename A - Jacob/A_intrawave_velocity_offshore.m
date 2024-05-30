@@ -309,6 +309,8 @@ end
 p_avg = mean(p);
 h = zp - zbed + p_avg;
 
+keyboard
+
 % call "wavelength" function at bottom of script to calculate the
 % wavelength for each intra-wave
 g=9.81;

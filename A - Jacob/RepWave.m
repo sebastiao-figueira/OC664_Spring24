@@ -357,8 +357,6 @@ for i = 1:numel(all_waves)
     u_x{1, i} = u_w{1, i} + abs(u_delta(1, i));
 end
 
-keyboard
-
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 % eqn (5): u_y = abs(u_delta) * sin(phi); 
@@ -465,6 +463,8 @@ end
 
 p_avg = mean(p);
 h = zp - zbed + p_avg;
+
+keyboard
 
 % call "wavelength" function at bottom of script to calculate the
 % wavelength for each intra-wave
