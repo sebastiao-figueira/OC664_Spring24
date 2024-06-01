@@ -2,7 +2,7 @@
 % Nearshore Sediment Transport, Final Project
 % Code for "A. Intra-wave velocity time series"
 
-% Version 3
+% Version 4
 
 close all
 clear all
@@ -43,11 +43,6 @@ hold off;
 ax = gca;
 ax.FontSize = 20;
 
-fig = figure();
-plot(u); hold on 
-yline(0)
-xlim([0,30])
-
 % interpolating u and t
 tq = t(1):0.05:t(end);
 tq = tq';
@@ -55,12 +50,6 @@ uq = interp1(t,u,tq);
 
 u = uq;
 t = tq;
-
-fig = figure();
-plot(u); hold on 
-yline(0)
-xlim([0,300])
-grid()
 
 % concatenate "u" and "t" to associate time data with velocity data
 u_with_t = [u, t];
@@ -163,14 +152,12 @@ figure();
 plot(all_waves{1, 5}(:, 2)-all_waves{1, 5}(1, 2), all_waves{1, 5}(:, 1), 'linewidth', 2, 'color', 'k')
 xlabel('Time [s]', 'FontWeight', 'Bold');
 ylabel('u [m/s]', 'FontWeight', 'Bold');
-% title('Example of Intra-Wave for Gauge 1')
+title('Example of Intra-Wave for Gauge 1')
 grid on
 ax = gca;
 ax.FontSize = 24;
 xlim([0,13])
 ylim([-1.5,1.5])
-
-keyboard
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
@@ -206,7 +193,6 @@ end
 % calculate u_x, time varying orbital velocity in x-direction
 for i = 1:numel(all_waves)
     u_x{1, i} = u_w{1, i} + u_delta(1, i);
-%     u_x{1, i} = u_w{1, i} + abs(u_delta(1, i));
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -242,7 +228,6 @@ end
 % iterate to calculate u_hat_t for each wave
 
 for i = 1:numel(all_waves)
-%     u_hat_t(1, i) = min(u_w{1,i});
     u_hat_t(1, i) = u_delta(1,i) - min(u_x{1,i});
 end
 
@@ -286,8 +271,6 @@ end
 % iterate to calculate u_crx and u_cry
 for i = 1:numel(all_waves)
     u_crx(1, i) = u_tilda_cr(1, i) + u_delta(1, i);
-%     u_crx(1, i) = u_tilda_cr(1, i) + abs(u_delta(1, i));
-    % u_cry(1, i) = abs(u_delta(1, i) * cos(phi));
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -301,7 +284,6 @@ end
 
 for i = 1:numel(all_waves)
     u_trx(1, i) = -u_tilda_tr(1, i) + u_delta(1, i);
-%     u_trx(1, i) = -u_tilda_tr(1, i) + abs(u_delta(1, i));
 end
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
@@ -329,7 +311,7 @@ end
 keyboard
 
 % create an output file of parameters needed for other parts of the project
-output_file = 'intrawave_outputs_onshore.mat'; % file name
+output_file = 'A_intrawave_velocity_timeseries_output_file.mat'; % file name
 
 % save the variables to a .mat file
 save(output_file, 'T', 'T_c', 'T_t', 'T_cu', 'T_tu', 'u_w', 'u_delta', 'u_x', ...
