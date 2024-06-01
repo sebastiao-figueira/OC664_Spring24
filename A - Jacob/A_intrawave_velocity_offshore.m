@@ -160,13 +160,15 @@ end
 % all_waves 5th column is time at negative maxima
 
 figure();
-plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1), 'linewidth', 2)
-xlabel('t [s]');
+plot(all_waves{1, 5}(:, 2), all_waves{1, 5}(:, 1), 'linewidth', 2, 'color', 'k')
+xlabel('Time [s]');
 ylabel('u [m/s]');
-title('Example of Intra-Wave for Gauge 1')
+% title('Example of Intra-Wave for Gauge 1')
 grid on
 ax = gca;
-ax.FontSize = 20;
+ax.FontSize = 24;
+
+keyboard
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
 

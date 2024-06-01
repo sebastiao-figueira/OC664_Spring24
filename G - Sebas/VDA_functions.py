@@ -467,7 +467,7 @@ class modelfunctions:
         # Q_sum = sum(q_s)
         # Q_sum = Q_sum/10800
         
-        Q_sum = np.mean(q_s)
+        Q_sum = np.median(q_s)
         Q_sum = Q_sum * 86400
 
         return q_s, Q_sum

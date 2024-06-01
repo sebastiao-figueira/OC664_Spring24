@@ -46,41 +46,52 @@ s     = rho_s/rho
 # Load Jacob's output
 mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
 
-a_hat      = mat['a_hat'][0][4:5]
-c_w        = mat['c_w'][0][4:5]
-T          = mat['T'][0][4:5]
-T_c        = mat['T_c'][0][4:5]
-T_cu       = mat['T_cu'][0][4:5]
-T_t        = mat['T_t'][0][4:5]
-T_tu       = mat['T_tu'][0][4:5]
-u_crx      = mat['u_crx'][0][4:5]
-u_delta    = mat['u_delta'][0][4:5]
-u_hat      = mat['u_hat'][0][4:5]
-u_hat_c    = mat['u_hat_c'][0][4:5]
-u_hat_t    = mat['u_hat_t'][0][4:5]
-u_tilda_cr = mat['u_tilda_cr'][0][4:5]
-u_tilda_tr = mat['u_tilda_tr'][0][4:5]
-u_trx      = mat['u_trx'][0][4:5]
-u_w        = mat['u_w'][0][4:5]
-u_x        = mat['u_x'][0][4:5]
+# a_hat      = mat['a_hat'][0][4:5]
+# c_w        = mat['c_w'][0][4:5]
+# T          = mat['T'][0][4:5]
+# T_c        = mat['T_c'][0][4:5]
+# T_cu       = mat['T_cu'][0][4:5]
+# T_t        = mat['T_t'][0][4:5]
+# T_tu       = mat['T_tu'][0][4:5]
+# u_crx      = mat['u_crx'][0][4:5]
+# u_delta    = mat['u_delta'][0][4:5]
+# u_hat      = mat['u_hat'][0][4:5]
+# u_hat_c    = mat['u_hat_c'][0][4:5]
+# u_hat_t    = mat['u_hat_t'][0][4:5]
+# u_tilda_cr = mat['u_tilda_cr'][0][4:5]
+# u_tilda_tr = mat['u_tilda_tr'][0][4:5]
+# u_trx      = mat['u_trx'][0][4:5]
+# u_w        = mat['u_w'][0][4:5]
+# u_x        = mat['u_x'][0][4:5]
 
-# a_hat      = mat['a_hat'][0]
-# c_w        = mat['c_w'][0]
-# T          = mat['T'][0]
-# T_c        = mat['T_c'][0]
-# T_cu       = mat['T_cu'][0]
-# T_t        = mat['T_t'][0]
-# T_tu       = mat['T_tu'][0]
-# u_crx      = mat['u_crx'][0]
-# u_delta    = mat['u_delta'][0]
-# u_hat      = mat['u_hat'][0]
-# u_hat_c    = mat['u_hat_c'][0]
-# u_hat_t    = mat['u_hat_t'][0]
-# u_tilda_cr = mat['u_tilda_cr'][0]
-# u_tilda_tr = mat['u_tilda_tr'][0]
-# u_trx      = mat['u_trx'][0]
-# u_w        = mat['u_w'][0]
-# u_x        = mat['u_x'][0]
+# fig, ax = plt.subplots() 
+# fig.set_size_inches((10, 6)) 
+# ax.set_xlabel('Time [s]', weight='bold')
+# ax.set_ylabel('u [m/s]', weight='bold')
+# ax.plot(t, u, linewidth=2,color='k')
+# ax.grid()
+# ax.set_ylim(-1.5, 1.5)
+# manager = plt.get_current_fig_manager(); manager.window.showMaximized()
+# fig_name=r'\1) Time Series (1 min) (sensor 3).png'
+# # plt.savefig(fig_path + fig_name, dpi=600, bbox_inches='tight')
+
+a_hat      = mat['a_hat'][0]
+c_w        = mat['c_w'][0]
+T          = mat['T'][0]
+T_c        = mat['T_c'][0]
+T_cu       = mat['T_cu'][0]
+T_t        = mat['T_t'][0]
+T_tu       = mat['T_tu'][0]
+u_crx      = mat['u_crx'][0]
+u_delta    = mat['u_delta'][0]
+u_hat      = mat['u_hat'][0]
+u_hat_c    = mat['u_hat_c'][0]
+u_hat_t    = mat['u_hat_t'][0]
+u_tilda_cr = mat['u_tilda_cr'][0]
+u_tilda_tr = mat['u_tilda_tr'][0]
+u_trx      = mat['u_trx'][0]
+u_w        = mat['u_w'][0]
+u_x        = mat['u_x'][0]
 
 #%% APPLYING REST OF VDA13 EQS
 
@@ -118,86 +129,21 @@ shields     = [theta_cmag, theta_tmag, theta_cx, theta_tx]
 
 q_s, Q_sum = vda.modelfunctions.sediment_transport(omega, wave_period, shields, rho, rho_s, d50, g)
 
+#%% Figure
 
+step = 1e-4
+bins = np.arange(0, max(q_s)+step, step)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# print("for calculated theta avg q_s = ", np.mean(q_s))
-
-# # Define the bins with a width of 0.001
-# bins = np.arange(0, 0.1 + 0.001, 0.001)
-
-# # Create the histogram
-# plt.hist(q_s, bins=bins, color='crimson')
-
-# # Set the x and y axis labels
-# plt.xlabel('Net Transport Rate (m$^2$/s)')
-# plt.ylabel('Number of Waves')
-
-# # Set the x-axis limit
-# plt.xlim(0, 0.1)
-
-# # Display the plot
-# plt.show()
-
-# # %% general inputs
-# # Edited theta_cx and theta_tx
-# theta_cx = np.ones(np.shape(T)) 
-# theta_tx = np.ones(np.shape(T))
-
-# # Carly output:
-# dstar            = vda.modelfunctions.dimensionless_grainsize()
-# shields_cr       = vda.modelfunctions.critical_shields(dstar)
-# omega_c, omega_t = vda.modelfunctions.sandload(theta_cmag, theta_tmag, shields_cr)
-
-# # Carson output:
-# shields_hat_c, shields_hat_t = vda.modelfunctions.shields_hat(fwdelt_c, fwdelt_t, u_hat_c, u_hat_t)
-# sheetflow_thickness_c        = vda.modelfunctions.sfl_thickness(shields_hat_c, d50)
-# sheetflow_thickness_t        = vda.modelfunctions.sfl_thickness(shields_hat_t, d50)
-
-# # Luis output:
-# omega_cc, omega_ct, omega_tt, omega_tc = vda.modelfunctions.phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c,
-#                                                                      T_cu, sheetflow_thickness_c, T_t, T_tu,
-#                                                                      sheetflow_thickness_t, omega_c, omega_t, alpha=8.2,
-#                                                                      xi=1.7, g=9.81, nu=2e-6)
-
-# # Sebas output
-# omega       = [omega_cc, omega_ct, omega_tt, omega_tc]
-# wave_period = [T, T_c, T_cu, T_t, T_tu]
-# shields     = [theta_cmag, theta_tmag, theta_cx, theta_tx]
-
-# q_s_edited, Q_sum_edited = vda.modelfunctions.sediment_transport(omega, wave_period, shields, rho, rho_s, d50, g)
-
-# print("for constant theta avg q_s = ", np.mean(q_s_edited))
-
-# # Define the bins with a width of 0.000001
-# bins = np.arange(0, 0.00015 + 0.000001, 0.000001)
-
-# # Create the histogram with forest green color
-# plt.hist(q_s_edited, bins=bins, color='forestgreen')
-
-# # Set the x and y axis labels with superscript units
-# plt.xlabel('Net Transport Rate (m$^2$/s)')
-# plt.ylabel('Number of Waves')
-
-# # Set the x-axis limit
-# plt.xlim(0, 0.00015)
-
-# # Use scientific notation for the x-axis
-# plt.gca().xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-# plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-
-# # Display the plot
-# plt.show()
+fig_name=r'qs Histogram.png'
+fig, ax = plt.subplots(figsize=(4,10))
+ax.hist(q_s, bins=bins, density=False, color='r', edgecolor='black', zorder=2)
+ax.set_title('Wave runup (camera)')
+ax.set_xlabel('Net Transport Rate (m$^2$/s)', fontdict=font_label)
+ax.set_ylabel('Number of Waves', fontdict=font_label)
+# ax.invert_xaxis()
+ax.grid()
+ax.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+# ax.legend(prop={"size":16})
+ax.set_xlim(0,0.5e-2)
+plt.savefig(fig_name, dpi=600, bbox_inches='tight')
