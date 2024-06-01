@@ -46,6 +46,7 @@ s     = rho_s/rho
 # Load Jacob's output
 mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
 
+# Representative Wave
 # a_hat      = mat['a_hat'][0][4:5]
 # c_w        = mat['c_w'][0][4:5]
 # T          = mat['T'][0][4:5]
@@ -64,17 +65,7 @@ mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
 # u_w        = mat['u_w'][0][4:5]
 # u_x        = mat['u_x'][0][4:5]
 
-# fig, ax = plt.subplots() 
-# fig.set_size_inches((10, 6)) 
-# ax.set_xlabel('Time [s]', weight='bold')
-# ax.set_ylabel('u [m/s]', weight='bold')
-# ax.plot(t, u, linewidth=2,color='k')
-# ax.grid()
-# ax.set_ylim(-1.5, 1.5)
-# manager = plt.get_current_fig_manager(); manager.window.showMaximized()
-# fig_name=r'\1) Time Series (1 min) (sensor 3).png'
-# # plt.savefig(fig_path + fig_name, dpi=600, bbox_inches='tight')
-
+# Wave-by-wave
 a_hat      = mat['a_hat'][0]
 c_w        = mat['c_w'][0]
 T          = mat['T'][0]
@@ -129,14 +120,18 @@ shields     = [theta_cmag, theta_tmag, theta_cx, theta_tx]
 
 q_s, Q_sum = vda.modelfunctions.sediment_transport(omega, wave_period, shields, rho, rho_s, d50, g)
 
-#%% Figure
+# q_s   [m^2/s]
+# Q_sum [m^2/day]
+
+#%% q_s histogram
 
 step = 1e-4
 bins = np.arange(0, max(q_s)+step, step)
 
 fig_name=r'qs Histogram.png'
-fig, ax = plt.subplots(figsize=(8,6))
+fig, ax = plt.subplots(figsize=(4,10))
 ax.hist(q_s, bins=bins, density=False, color='r', edgecolor='black', zorder=2)
+ax.set_title('Wave runup (camera)')
 ax.set_xlabel('Net Transport Rate (m$^2$/s)', fontdict=font_label)
 ax.set_ylabel('Number of Waves', fontdict=font_label)
 # ax.invert_xaxis()

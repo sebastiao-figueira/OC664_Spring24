@@ -462,12 +462,9 @@ class modelfunctions:
 
         # Calculate net sediment transport rate
         q_s = (q_c + q_t) * np.sqrt((s - 1) * g * d_50 ** 3) / T
-
-        # Sum sediment transport over selected time period
-        # Q_sum = sum(q_s)
-        # Q_sum = Q_sum/10800
         
+        # Represenative statistic to report (could be np.mean as well)
         Q_sum = np.median(q_s)
-        Q_sum = Q_sum * 86400
+        Q_sum = Q_sum * 86400 # [m^2/day]
 
         return q_s, Q_sum
