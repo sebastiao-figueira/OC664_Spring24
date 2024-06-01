@@ -1,4 +1,3 @@
-import scipy
 import numpy as np
 
 
@@ -7,6 +6,45 @@ class modelfunctions:
     # %% Colin and Emily's function
     @staticmethod
     def combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat, u_delta, delta, d50, d90, s, g):
+        """Calculates wave-current interaction parameters including wave-related friction factors, 
+        current-related friction factors, ripple dimensions, and Shields parameters using an iterative method.
+    
+        INPUTS:
+        T_cu (ndarray): Partial crest period
+        T_c (ndarray): Crest half cycle period
+        T_tu (ndarray): Partial trough period
+        T_t (ndarray): Trough half cycle period
+        a_hat (ndarray): Representative wave orbital excursion amplitude
+        u_hat (ndarray): Representative orbital velocity
+        u_delta (ndarray): Current velocity at the boundary
+        delta (float): Boundary layer thickness
+        d50 (float): Median grain size
+        d90 (float): 90th percentile grain size
+        s (float): Specific gravity
+        g (float): Gravitational constant
+    
+        OUTPUTS:
+        f_wc (ndarray): Wave-related friction factor for the crest half cycle of a wave period
+        f_wt (ndarray): Wave-related friction factor for the trough half cycle of a wave period
+        fdelta (ndarray): Current-related friction factor
+        f_w (ndarray): General wave friction factor from the Swart equation
+        eta (ndarray): Ripple height
+        shields_aa (ndarray): Time-averaged absolute value of the Shields parameter
+        ksdelta (ndarray): Current-related bed roughness
+        ksw (ndarray): Wave-related bed roughness
+        lambda_ (ndarray): Ripple length
+    
+        Description:
+        1. Calculate the maximum mobility number (`psimax`) based on the wave orbital velocity.
+        2. Determine the coefficients `mlambda`, `meta`, and `mu` based on the median grain size (`d50`), using equations B.3, B.4, and A.2 from VDA13.
+        3. Compute the dimensionless ripple steepness factor (`n`), ripple height (`eta`), and ripple length (`lambda_`) using equations B.1, B.2, and B.5.
+        4. Iteratively calculate current-related bed roughness (`ksdelta`), current friction factor (`fdelta`), time-averaged absolute Shields stress (`shields_aa`), and wave-related bed roughness (`ksw`) until convergence.
+        5. Calculate the general wave friction factor (`f_w`) using the Swart equation (A.4) and adjust for ripple dimensions.
+        6. Compute the wave-related friction factors for the crest (`f_wc`) and trough (`f_wt`) half cycles, accounting for acceleration skewness using equation 21 from VDA13.
+    
+        Returns:
+        A tuple containing `f_wc`, `f_wt`, `fdelta`, `f_w`, `eta`, `shields_aa`, `ksdelta`, `ksw`, `lambda_`.
+        """
         # Maximum mobility number
         psimax = (1.27 * u_hat) ** 2 / ((s - 1) * g * d50)
 
@@ -130,6 +168,43 @@ class modelfunctions:
     # %% Maggie's function
     @staticmethod
     def currentfric(u_delta, uhat, fw_c, fw_t, rho, fw_swart, cw, uc_r, ut_r, s, g, d50, fdelta):
+        """Calculates wave-current interaction parameters including wave-current friction factors,
+        wave Reynolds stress, and bed shear stress at both the crest and trough.
+    
+        INPUTS:
+        u_delta (float): Current velocity (time-mean of velocity time series) [JACOB]
+        uhat (float): Representative orbital velocity amplitude [JACOB] (eqn 8)
+        fw_c (float): Wave friction factor at crest [COLIN] (eqn 21)
+        fw_t (float): Wave friction factor at trough [COLIN] (eqn 21)
+        rho (float): Density of seawater in kg/m^3 [SEBAS]
+        fw_swart (float): Swart's friction factor from appendix A.4 [COLIN] (eqn A.4)
+        cw (float): Wave speed where cw=L/T, L=wavelength, T=wave period, from LWT [LUIS]
+        uc_r (float): Representative half-cycle wave-current velocity at crest [JACOB] (eqn 12)
+        ut_r (float): Representative half-cycle wave-current velocity at trough [JACOB] (eqn 13)
+        s (float): Specific gravity [SEBAS] (section 2 of VDA13)
+        g (float): Constant of gravitational acceleration [SEBAS]
+        d50 (float): Median grain size of sediment [SEBAS]
+        fdelta (float): Current-related roughness [EMILY] (eqn A.1)
+    
+        OUTPUTS:
+        fwdelt_c (float): Wave-current friction factor at the crest (eqn 18)
+        fwdelt_t (float): Wave-current friction factor at the trough (eqn 18)
+        TwRe (float): Wave Reynolds stress (eqn 22)
+        theta_cmag (float): Magnitude of the Shields parameter at crest (eqn 17)
+        theta_tmag (float): Magnitude of the Shields parameter at trough (eqn 17)
+        theta_cx (float): X component of the Shields parameter at crest (eqn 15)
+        theta_tx (float): X component of the Shields parameter at trough (eqn 15)
+    
+        Description:
+        1. Calculate `alpha`, a dimensionless parameter representing the relative influence of current versus wave orbital velocity.
+        2. Compute wave-current friction factors at the crest (`fwdelt_c`) and trough (`fwdelt_t`) by blending the current friction factor (`fdelta`) with the wave friction factors (`fw_c` and `fw_t`) based on `alpha`.
+        3. Calculate the wave Reynolds stress (`TwRe`), which measures the turbulent stress within the wave boundary layer.
+        4. Compute the Shields parameter magnitudes at the crest (`theta_cmag`) and trough (`theta_tmag`). The Shields parameter is a dimensionless number used to determine the initiation of sediment transport.
+        5. Calculate the bed shear stress (Shields vectors) at the crest (`theta_cx`) and trough (`theta_tx`), which are crucial for assessing sediment transport.
+        
+        Returns:
+        A tuple containing `fwdelt_c`, `fwdelt_t`, `TwRe`, `theta_cmag`, `theta_tmag`, `theta_cx`, `theta_tx`, `fw_Delt`.
+        """
         #assumed wave boundary layer thickness (see section 6 VDA13)
         
         #compare current vs wave orbital velocity(eqn 19)
@@ -380,11 +455,8 @@ class modelfunctions:
         elif P_t > 1:
             omega_tt = omega_t / P_t
             omega_tc = (1 - 1 / P_t) * omega_t
-            
-        print(P_c)
-        print(P_t)
 
-        return omega_cc, omega_ct, omega_tt, omega_tc
+        return omega_cc, omega_ct, omega_tt, omega_tc, P_c, P_t
 
     @staticmethod
     def phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c, T_cu, delta_sc, T_t, T_tu, delta_st, omega_c,
@@ -397,9 +469,11 @@ class modelfunctions:
         omega_ct = []
         omega_tt = []
         omega_tc = []
+        P_c = []
+        P_t = []
 
         for i in range(len(eta)):
-            omega_cc_temp, omega_ct_temp, omega_tt_temp, omega_tc_temp = modelfunctions.phaseLagSingle(rho, rho_s, d50,
+            omega_cc_temp, omega_ct_temp, omega_tt_temp, omega_tc_temp, P_c_temp, P_t_temp = modelfunctions.phaseLagSingle(rho, rho_s, d50,
                                                                                                        eta[i],
                                                                                                        u_hat_c[i],
                                                                                                        u_hat_t[i],
@@ -417,14 +491,19 @@ class modelfunctions:
             omega_ct.append(omega_ct_temp)
             omega_tt.append(omega_tt_temp)
             omega_tc.append(omega_tc_temp)
+            P_c.append(P_c_temp)
+            P_t.append(P_t_temp)
 
         omega_cc = np.array(omega_cc)
         omega_ct = np.array(omega_ct)
         omega_tt = np.array(omega_tt)
         omega_tc = np.array(omega_tc)
+        P_c = np.array(P_c)
+        P_t = np.array(P_t)
 
-        return omega_cc, omega_ct, omega_tt, omega_tc
+        return omega_cc, omega_ct, omega_tt, omega_tc, P_c, P_t
 
+    #%% Sebas' function
     @staticmethod
     def sediment_transport(omega, wave_period, shields, rho=1000, rho_s=2650, d_50=0.0002, g=9.81):
         """
@@ -441,7 +520,8 @@ class modelfunctions:
             g (float): Acceleration due to gravity (default: 9.81 m/s^2).
     
         Returns:
-            float: Net sediment transport rate.
+            q_s (array): Net sediment transport rate.
+            Q_sum (float): Net sediment transport for given time period.
         """
 
         # Check input array sizes

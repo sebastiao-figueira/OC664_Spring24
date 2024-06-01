@@ -12,17 +12,17 @@ from matplotlib.ticker import ScalarFormatter
 font_label = {'family': 'serif',
         'color':  'black',
         'weight': 'normal',
-        'size': 24,
+        'size': 20,
         }
 
 font = {'family' : 'serif',
 'weight' : 'bold',
-'size' : 22}
+'size' : 16}
 plt.rc('font', **font)
 
-SMALL_SIZE = 20
-MEDIUM_SIZE = 22
-BIGGER_SIZE = 24
+SMALL_SIZE = 18
+MEDIUM_SIZE = 18
+BIGGER_SIZE = 20
 
 plt.rc('axes', titlesize=MEDIUM_SIZE)
 plt.rc('axes', labelsize=MEDIUM_SIZE)  
@@ -43,7 +43,8 @@ s     = rho_s/rho
 
 #%% LOADING DATA
 
-# Load Jacob's output
+# A - intra wave data extraction
+# Load Jacob's output from SandyDuck '97 data
 mat = scipy.io.loadmat('A_intrawave_velocity_timeseries_output_file.mat')
 
 # Representative Wave
@@ -84,35 +85,39 @@ u_trx      = mat['u_trx'][0]
 u_w        = mat['u_w'][0]
 u_x        = mat['u_x'][0]
 
-#%% APPLYING REST OF VDA13 EQS
+#%% APPLYING VDA13 EQS
 
+# C1 and D - Wave friction factor and ripple model
 # Colin/Emily output:
 f_wc, f_wt, fdelta, f_w, eta, shields_aa, ksdelta, ksw, lambda_ = vda.modelfunctions.combined_wavefric_ripples(T_cu, T_c, T_tu, T_t, a_hat, u_hat,
                                                                             u_delta, delta, d50, d90, s, g)
 
+# C2 - Current friction factor
 # Maggie output:
 fwdelt_c, fwdelt_t, TwRe, theta_cmag, theta_tmag, theta_cx, theta_tx, fw_Delt = vda.modelfunctions.currentfric(u_delta, u_hat,
                                                                                                       f_wc, f_wt, rho,
                                                                                                       f_w,
                                                                                                       c_w, u_crx, u_trx,
                                                                                                       s, g, d50, fdelta)
-
+# B - Entrained Sand Load
 # Carly output:
 dstar            = vda.modelfunctions.dimensionless_grainsize()
 shields_cr       = vda.modelfunctions.critical_shields(dstar)
 omega_c, omega_t = vda.modelfunctions.sandload(theta_cmag, theta_tmag, shields_cr)
 
+# F - Sheet flow thickness
 # Carson output:
 shields_hat_c, shields_hat_t = vda.modelfunctions.shields_hat(fwdelt_c, fwdelt_t, u_hat_c, u_hat_t)
 sheetflow_thickness_c        = vda.modelfunctions.sfl_thickness(shields_hat_c, d50)
 sheetflow_thickness_t        = vda.modelfunctions.sfl_thickness(shields_hat_t, d50)
 
+# E - Phase Lag
 # Luis output:
-omega_cc, omega_ct, omega_tt, omega_tc = vda.modelfunctions.phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c,
+omega_cc, omega_ct, omega_tt, omega_tc, P_c, P_t = vda.modelfunctions.phaseLag(rho, rho_s, d50, eta, u_hat_c, u_hat_t, c_w, T_c,
                                                                      T_cu, sheetflow_thickness_c, T_t, T_tu,
-                                                                     sheetflow_thickness_t, omega_c, omega_t, alpha=8.2,
-                                                                     xi=1.7, g=9.81, nu=2e-6)
+                                                                     sheetflow_thickness_t, omega_c, omega_t, alpha=8.2, xi=1.7, g=9.81, nu=2e-6)
 
+# G - Main Function
 # Sebas output
 omega       = [omega_cc, omega_ct, omega_tt, omega_tc]
 wave_period = [T, T_c, T_cu, T_t, T_tu]
@@ -123,21 +128,35 @@ q_s, Q_sum = vda.modelfunctions.sediment_transport(omega, wave_period, shields, 
 # q_s   [m^2/s]
 # Q_sum [m^2/day]
 
-#%% q_s histogram
+#%% q_s histograms
 
-step = 1e-4
-bins = np.arange(0, max(q_s)+step, step)
+# Set up the figure with two subplots side by side
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(20, 10))
 
-fig_name=r'qs Histogram.png'
-fig, ax = plt.subplots(figsize=(4,10))
-ax.hist(q_s, bins=bins, density=False, color='r', edgecolor='black', zorder=2)
-ax.set_title('Wave runup (camera)')
-ax.set_xlabel('Net Transport Rate (m$^2$/s)', fontdict=font_label)
-ax.set_ylabel('Number of Waves', fontdict=font_label)
-# ax.invert_xaxis()
-ax.grid()
-ax.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-# ax.legend(prop={"size":16})
-ax.set_xlim(0,0.5e-2)
+# First histogram
+step1 = 1e-4
+bins1 = np.arange(0, max(q_s) + step1, step1)
+ax1.hist(q_s, bins=bins1, density=False, color='r', edgecolor='black', zorder=2)
+ax1.set_xlabel('Net Transport Rate (m$^2$/s)', fontdict=font_label)
+ax1.set_ylabel('Number of Waves', fontdict=font_label)
+ax1.grid()
+ax1.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+ax1.set_xlim(0, 5e-3)
+
+# Second histogram
+step2 = 1e-5
+bins2 = np.arange(0, max(q_s) + step2, step2)
+ax2.hist(q_s, bins=bins2, density=False, color='b', edgecolor='black', zorder=2)
+ax2.set_xlabel('Net Transport Rate (m$^2$/s)', fontdict=font_label)
+ax2.set_ylabel('Number of Waves', fontdict=font_label)
+ax2.grid()
+ax2.xaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+ax2.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+ax2.set_xlim(0, 1e-3)
+ax2.set_ylim(0, 249)
+
+# Save the combined figure
+fig_name = r'qs_Histogram_Combined.png'
 plt.savefig(fig_name, dpi=600, bbox_inches='tight')
+plt.show()
